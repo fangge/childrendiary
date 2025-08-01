@@ -2,6 +2,12 @@
 
 一个简单而功能强大的日记记录应用，帮助用户记录生活中的每一个精彩瞬间。
 
+## 在线访问
+
+访问我们的在线演示：[豆豆日记](https://fangge.github.io/childrendiary/)
+
+> **注意**：GitHub Pages版本是展示版，仅提供日记浏览功能，不包含用户管理和日记管理功能。
+
 ## 功能特点
 
 - **用户管理**：创建和管理用户信息，包括姓名和性别
@@ -50,6 +56,8 @@ pnpm build
 pnpm deploy
 ```
 
+项目已配置GitHub Actions，每次推送到main或master分支时会自动部署到GitHub Pages。
+
 ## 项目结构
 
 ```
@@ -78,7 +86,15 @@ doudoudiary2/
 
 ## 数据存储
 
-应用使用浏览器的localStorage存储用户和日记数据，无需后端服务器。
+- **本地开发环境**：使用Node.js后端服务器，数据存储在JSON文件中
+- **GitHub Pages环境**：从静态JSON文件中读取数据，展示已有的日记内容
+
+## GitHub Pages工作流程
+
+1. 在本地开发环境中更新`server/data`目录中的JSON数据
+2. 提交并推送更改到GitHub仓库
+3. GitHub Actions自动构建并部署到GitHub Pages
+4. GitHub Pages更新，展示最新的日记内容
 
 ## 许可证
 

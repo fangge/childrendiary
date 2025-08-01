@@ -7,7 +7,7 @@
     "dev": "http-server ./src -p 3000",
     "server": "node server/index.js",
     "start": "concurrently \"npm run server\" \"npm run dev\"",
-    "build": "mkdir -p dist && cp -r src/* dist/",
+    "build": "mkdir -p dist && cp -r src/* dist/ && mkdir -p dist/data && cp -r server/data/*.json dist/data/ && cp dist/index-github.html dist/index.html",
     "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

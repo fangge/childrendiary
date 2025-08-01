@@ -88,10 +88,10 @@
   <header class="bg-blue-600 text-white p-4 shadow-md no-print">
     <div class="container mx-auto flex justify-between items-center">
       <h1 class="text-2xl font-bold">豆豆日记</h1>
-      <nav class="space-x-4">
+      <nav class="space-x-4" id="main-nav">
         <a href="../index.html" class="hover:underline">首页</a>
-        <a href="./user-management.html" class="hover:underline">用户管理</a>
-        <a href="./diary-management.html" class="hover:underline">写日记</a>
+        <a href="./user-management.html" class="hover:underline management-link">用户管理</a>
+        <a href="./diary-management.html" class="hover:underline management-link">写日记</a>
         <a href="./diary-display.html" class="hover:underline font-bold">日记展示</a>
       </nav>
     </div>
@@ -172,6 +172,26 @@
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/main.js"></script>
   <script>
+    // 检测是否在GitHub Pages环境中
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    
+    // 如果是GitHub Pages环境，隐藏管理链接
+    if (isGitHubPages) {
+      document.addEventListener('DOMContentLoaded', function() {
+        // 修改首页链接指向GitHub版首页
+        const homeLink = document.querySelector('a[href="../index.html"]');
+        if (homeLink) {
+          homeLink.href = "../index-github.html";
+        }
+        
+        // 隐藏管理链接
+        const managementLinks = document.querySelectorAll('.management-link');
+        managementLinks.forEach(link => {
+          link.style.display = 'none';
+        });
+      });
+    }
+    
     document.addEventListener('DOMContentLoaded', async function() {
       const userFilter = document.getElementById('userFilter');
       const startDate = document.getElementById('startDate');
