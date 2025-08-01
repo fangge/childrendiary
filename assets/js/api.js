@@ -8,9 +8,25 @@ class ApiService {
     this.isGitHubPages = window.location.hostname.includes('github.io');
     this.baseUrl = 'http://localhost:3001/api';
     
-    // 在GitHub Pages环境中，设置静态数据路径
+    // 设置静态数据路径
     if (this.isGitHubPages) {
+      // 在GitHub Pages环境中，使用相对路径
       this.staticDataPath = './data';
+    } else {
+      // 在本地开发环境中，使用相对路径
+      const currentPath = window.location.pathname;
+      console.log('当前页面路径:', currentPath);
+      
+      // 根据当前页面路径确定正确的相对路径
+      if (currentPath.includes('/pages/')) {
+        // 如果是在pages目录下的页面，需要多上一级目录
+        this.staticDataPath = '../../server/data';
+      } else {
+        // 如果是在根目录下的页面
+        this.staticDataPath = './server/data';
+      }
+      
+      console.log('本地开发环境：使用静态数据路径:', this.staticDataPath);
     }
   }
   
@@ -105,74 +121,61 @@ class ApiService {
     }
 
     try {
+      console.log(`发送请求到: ${url}`, { method, data });
       const response = await fetch(url, options);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '请求失败');
+        let errorMessage = `请求失败: HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // 如果无法解析JSON，使用默认错误消息
+        }
+        throw new Error(errorMessage);
       }
       
-      return await response.json();
+      const result = await response.json();
+      console.log(`请求成功: ${url}`, result);
+      return result;
     } catch (error) {
-      console.error('API请求错误:', error);
+      console.error(`API请求错误 (${url}):`, error);
+      
+      // 如果服务器连接失败，尝试从本地JSON文件获取数据（开发环境备用方案）
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        console.warn('服务器连接失败，尝试从本地JSON文件获取数据');
+        return this.handleStaticDataRequest(endpoint, method, data);
+      }
+      
       throw error;
     }
   }
   
   // 处理静态数据请求
   async handleStaticDataRequest(endpoint, method, data) {
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // 只支持GET请求，其他请求返回模拟数据
-    if (method !== 'GET' && (endpoint === '/users' || endpoint === '/diaries')) {
-      console.warn(`GitHub Pages环境不支持${method}请求，返回模拟数据`);
-      
-      // 为POST请求生成一个模拟ID
-      if (method === 'POST') {
-        return {
-          ...data,
-          id: `${endpoint.substring(1)}_${Date.now()}`
-        };
-      }
-      
-      // 为其他请求返回成功状态
-      return { success: true };
+    // 只允许GET请求
+    if (method !== 'GET') {
+      return { success: false, error: `GitHub Pages环境只支持GET请求` };
     }
-    
-    // 处理GET请求，从静态JSON文件获取数据
+
+    // 只在GitHub Pages环境下生效
+    if (!this.isGitHubPages) {
+      throw new Error('本地开发环境不应调用handleStaticDataRequest');
+    }
+
+    // 只读静态json
     if (endpoint === '/users') {
-      try {
-        const response = await fetch(`${this.staticDataPath}/users.json`);
-        if (!response.ok) {
-          throw new Error(`获取用户数据失败: ${response.status}`);
-        }
-        const data = await response.json();
-        // 处理数据格式，确保返回数组
-        return data.users || [];
-      } catch (error) {
-        console.error('获取用户数据失败:', error);
-        return []; // 返回空数组作为默认值
-      }
+      const response = await fetch(`${this.staticDataPath}/users.json`);
+      if (!response.ok) throw new Error(`获取用户数据失败: ${response.status}`);
+      const data = await response.json();
+      return data.users || [];
     }
-    
     if (endpoint === '/diaries') {
-      try {
-        const response = await fetch(`${this.staticDataPath}/diaries.json`);
-        if (!response.ok) {
-          throw new Error(`获取日记数据失败: ${response.status}`);
-        }
-        const data = await response.json();
-        // 处理数据格式，确保返回数组
-        return data.diaries || [];
-      } catch (error) {
-        console.error('获取日记数据失败:', error);
-        return []; // 返回空数组作为默认值
-      }
+      const response = await fetch(`${this.staticDataPath}/diaries.json`);
+      if (!response.ok) throw new Error(`获取日记数据失败: ${response.status}`);
+      const data = await response.json();
+      return data.diaries || [];
     }
-    
-    // 对于其他请求，返回空数据
-    console.warn(`GitHub Pages环境不支持请求: ${endpoint}`);
     return { success: false, error: '不支持的请求' };
   }
 
