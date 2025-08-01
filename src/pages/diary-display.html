@@ -22,9 +22,19 @@
       padding: 20px;
       box-sizing: border-box;
       overflow-y: auto;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .diary-content {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #333;
     }
     .diary-content img {
       max-width: 100%;
+      border-radius: 4px;
+      margin: 10px 0;
     }
     .diary-date {
       font-style: italic;
@@ -35,10 +45,12 @@
       font-size: 1.5rem;
       margin-bottom: 15px;
       color: #333;
+      font-weight: bold;
     }
     .diary-author {
       font-weight: bold;
       margin-bottom: 20px;
+      color: #555;
     }
     .book-controls {
       text-align: center;
@@ -65,7 +77,24 @@
     @media (max-width: 768px) {
       #diary-book {
         width: 100%;
-        height: 500px;
+        height: auto;
+        display: block;
+      }
+      .diary-page {
+        width: 100%;
+        height: auto;
+        margin-bottom: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .diary-title {
+        font-size: 1.3rem;
+      }
+      .diary-content {
+        font-size: 0.95rem;
+      }
+      .book-controls {
+        display: none;
       }
     }
     /* 确保页脚不会覆盖内容 */
@@ -81,6 +110,28 @@
     footer {
       position: relative;
       width: 100%;
+    }
+    /* 筛选面板切换动画 */
+    #filterPanel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    #filterPanel.show {
+      max-height: 500px;
+    }
+    /* 旋转箭头动画 */
+    .rotate-arrow {
+      transform: rotate(180deg);
+    }
+    /* 筛选按钮样式 */
+    #toggleFilterBtn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    #toggleFilterBtn:hover {
+      background-color: rgba(59, 130, 246, 0.1);
     }
   </style>
 </head>
@@ -99,30 +150,40 @@
 
   <main class="container mx-auto p-4 mt-8">
     <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print">
-      <h2 class="text-2xl font-semibold mb-6">日记展示</h2>
-      
-      <!-- 筛选条件 -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-          <label for="userFilter" class="block text-gray-700 font-medium mb-2">选择用户</label>
-          <select id="userFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">所有用户</option>
-            <!-- 用户选项将通过JavaScript动态添加 -->
-          </select>
-        </div>
-        <div>
-          <label for="startDate" class="block text-gray-700 font-medium mb-2">开始日期</label>
-          <input type="date" id="startDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div>
-          <label for="endDate" class="block text-gray-700 font-medium mb-2">结束日期</label>
-          <input type="date" id="endDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold">日记展示</h2>
+        <button id="toggleFilterBtn" class="text-blue-600 flex items-center" aria-expanded="false" aria-controls="filterPanel">
+          <span>筛选</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
       </div>
       
-      <div class="flex justify-between mb-8">
-        <button id="filterBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">日记筛选</button>
-        <button id="printBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">打印日记</button>
+      <!-- 筛选条件 (默认隐藏) -->
+      <div id="filterPanel" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label for="userFilter" class="block text-gray-700 font-medium mb-2">选择用户</label>
+            <select id="userFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">
+              <option value="">所有用户</option>
+              <!-- 用户选项将通过JavaScript动态添加 -->
+            </select>
+          </div>
+          <div>
+            <label for="startDate" class="block text-gray-700 font-medium mb-2">开始日期</label>
+            <input type="date" id="startDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">
+          </div>
+          <div>
+            <label for="endDate" class="block text-gray-700 font-medium mb-2">结束日期</label>
+            <input type="date" id="endDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">
+          </div>
+        </div>
+        
+        <div class="flex justify-between mb-4">
+          <button id="filterBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" tabindex="0">日记筛选</button>
+          <button id="printBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition" tabindex="0">打印日记</button>
+        </div>
       </div>
     </div>
 
@@ -198,6 +259,8 @@
       const endDate = document.getElementById('endDate');
       const filterBtn = document.getElementById('filterBtn');
       const printBtn = document.getElementById('printBtn');
+      const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+      const filterPanel = document.getElementById('filterPanel');
       const diaryBook = document.getElementById('diary-book');
       const diaryContainer = document.getElementById('diary-container');
       const noDiariesMessage = document.getElementById('noDiariesMessage');
@@ -207,8 +270,65 @@
       const totalPages = document.getElementById('totalPages');
       const diaryDateRange = document.getElementById('diary-date-range');
       
+      // 检测是否为移动设备 - 使用User Agent而不是屏幕宽度
+      const checkMobile = () => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      };
+      
+      let isMobile = checkMobile();
+      
+      // 处理设备类型变化
+      const handleDeviceTypeChange = () => {
+        const wasMobile = isMobile;
+        isMobile = checkMobile();
+        
+        // 如果设备类型发生变化
+        if (wasMobile !== isMobile) {
+          // 更新UI元素
+          const bookControls = document.querySelector('.book-controls');
+          if (bookControls) {
+            if (isMobile) {
+              bookControls.classList.add('hidden');
+            } else {
+              bookControls.classList.remove('hidden');
+            }
+          }
+          
+          // 重新加载日记以适应新的设备类型
+          loadDiaries();
+        }
+      };
+      
+      // 监听窗口大小变化，重新检测设备类型
+      window.addEventListener('resize', handleDeviceTypeChange);
+      
+      // 页面加载完成后立即检测设备类型并设置UI
+      document.addEventListener('DOMContentLoaded', handleDeviceTypeChange);
+      
       // 初始化Turn.js实例变量
       let turnInstance = null;
+      
+      // 筛选面板切换功能
+      toggleFilterBtn.addEventListener('click', function() {
+        const arrow = toggleFilterBtn.querySelector('svg');
+        arrow.classList.toggle('rotate-arrow');
+        
+        // 更新aria属性
+        const isExpanded = toggleFilterBtn.getAttribute('aria-expanded') === 'true';
+        toggleFilterBtn.setAttribute('aria-expanded', !isExpanded);
+        
+        // 切换筛选面板显示状态
+        filterPanel.classList.toggle('hidden');
+        filterPanel.classList.toggle('show');
+      });
+      
+      // 键盘访问支持
+      toggleFilterBtn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleFilterBtn.click();
+        }
+      });
       
       // 加载用户选项
       async function loadUserOptions() {
@@ -228,8 +348,15 @@
         }
       }
       
-      // 初始化Turn.js
+      // 初始化Turn.js (仅在非移动设备上)
       function initTurnJs() {
+        // 在移动设备上不初始化Turn.js (基于User Agent和屏幕宽度检测)
+        if (isMobile) {
+          // 隐藏书本控制按钮
+          document.querySelector('.book-controls').classList.add('hidden');
+          return;
+        }
+        
         if (turnInstance) {
           // 销毁现有实例
           turnInstance.destroy();
@@ -258,13 +385,15 @@
       // 加载日记数据
       async function loadDiaries() {
         try {
-          // 销毁现有的Turn.js实例
-          try {
-            if (turnInstance && typeof $(diaryBook).turn === 'function' && $(diaryBook).data() && $(diaryBook).data().turn) {
-              $(diaryBook).turn("destroy");
+          // 销毁现有的Turn.js实例（仅在非移动设备上，基于User Agent和屏幕宽度检测）
+          if (!isMobile) {
+            try {
+              if (turnInstance && typeof $(diaryBook).turn === 'function' && $(diaryBook).data() && $(diaryBook).data().turn) {
+                $(diaryBook).turn("destroy");
+              }
+            } catch (error) {
+              console.log("销毁Turn.js实例时出错:", error);
             }
-          } catch (error) {
-            console.log("销毁Turn.js实例时出错:", error);
           }
           
           const userId = userFilter.value;
@@ -299,117 +428,144 @@
             return true;
           });
         
-        console.log("筛选条件:", { userId, startDateValue, endDateValue });
-        console.log("筛选后的日记:", filteredDiaries);
-        
-        // 按日期排序
-        const sortedDiaries = filteredDiaries.sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        // 更新日期范围显示
-        updateDateRangeDisplay(sortedDiaries);
-        
-        // 清除现有日记页面（保留封面和封底）
-        // 获取所有日记页面
-        const pages = Array.from(diaryBook.querySelectorAll('.diary-page'));
-        
-        // 如果有超过2个页面（封面和封底），则删除中间的日记页面
-        if (pages.length > 2) {
-          // 保留第一个（封面）和最后一个（封底）
-          const pagesToRemove = pages.slice(1, pages.length - 1);
-          pagesToRemove.forEach(page => {
-            if (page && page.parentNode === diaryBook) {
-              diaryBook.removeChild(page);
-            }
-          });
-        }
-        
-        if (sortedDiaries.length === 0) {
-          // 显示无日记提示
-          diaryContainer.classList.add('hidden');
-          noDiariesMessage.classList.remove('hidden');
-          return;
-        }
-        
-        // 显示日记容器
-        diaryContainer.classList.remove('hidden');
-        noDiariesMessage.classList.add('hidden');
-        
-        // 完全重建日记书本
-        // 保留第一个元素（如果存在）作为封面
-        let frontCover = null;
-        if (pages.length >= 1) {
-          frontCover = pages[0];
-        }
-        
-        // 清空日记书本
-        diaryBook.innerHTML = '';
-        
-        // 如果没有封面或者封面被清除了，创建一个新的封面
-        if (!frontCover) {
-          frontCover = document.createElement('div');
-          frontCover.className = 'diary-page text-center flex flex-col justify-center items-center';
-          frontCover.innerHTML = `
-            <h1 class="text-4xl font-bold mb-4">豆豆日记</h1>
-            <p class="text-xl mb-8">我的生活记录</p>
-            <p id="diary-date-range" class="text-lg">2025年8月</p>
-          `;
-        }
-        
-        // 添加封面
-        diaryBook.appendChild(frontCover);
-        
-        // 更新日期范围显示（因为我们可能已经清除了原来的元素）
-        const dateRangeElement = document.getElementById('diary-date-range');
-        if (dateRangeElement) {
+          console.log("筛选条件:", { userId, startDateValue, endDateValue });
+          console.log("筛选后的日记:", filteredDiaries);
+          
+          // 按日期排序
+          const sortedDiaries = filteredDiaries.sort((a, b) => new Date(a.date) - new Date(b.date));
+          
+          // 更新日期范围显示
+          updateDateRangeDisplay(sortedDiaries);
+          
           if (sortedDiaries.length === 0) {
-            dateRangeElement.textContent = '无日记';
-          } else {
-            const firstDate = new Date(sortedDiaries[0].date);
-            const lastDate = new Date(sortedDiaries[sortedDiaries.length - 1].date);
-            
-            const firstDateStr = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
-            
-            if (sortedDiaries.length === 1) {
-              dateRangeElement.textContent = firstDateStr;
-            } else {
-              const lastDateStr = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
-              dateRangeElement.textContent = `${firstDateStr} - ${lastDateStr}`;
-            }
+            // 显示无日记提示
+            diaryContainer.classList.add('hidden');
+            noDiariesMessage.classList.remove('hidden');
+            return;
           }
-        }
-        
-        // 添加日记页面
-        for (const diary of sortedDiaries) {
-          const users = await DiaryStorage.getUsers();
-          const user = users.find(u => u.id === diary.userId);
-          const userName = user ? user.name : '未知用户';
           
-          const diaryPage = document.createElement('div');
-          diaryPage.className = 'diary-page';
-          diaryPage.innerHTML = `
-            <div class="diary-date">${diary.date}</div>
-            <h2 class="diary-title">${diary.title}</h2>
-            <div class="diary-author">作者: ${userName}</div>
-            <div class="diary-content">${diary.content}</div>
-          `;
+          // 显示日记容器
+          diaryContainer.classList.remove('hidden');
+          noDiariesMessage.classList.add('hidden');
           
-          // 直接添加到日记书本中
-          diaryBook.appendChild(diaryPage);
-        }
-        
-        // 创建封底
-        const backCover = document.createElement('div');
-        backCover.className = 'diary-page text-center flex flex-col justify-center items-center';
-        backCover.innerHTML = `
-          <h2 class="text-2xl font-bold mb-4">感谢阅读</h2>
-          <p>记录生活，珍藏回忆</p>
-        `;
-        
-        // 添加封底
-        diaryBook.appendChild(backCover);
-        
-        // 初始化Turn.js
-        setTimeout(initRealTurnJs, 100);
+          // 清空日记书本
+          diaryBook.innerHTML = '';
+          
+          // 移动设备和桌面设备使用不同的展示方式
+          if (isMobile) {
+            // 移动设备：普通列表展示
+            // 添加标题
+            const titleElement = document.createElement('div');
+            titleElement.className = 'diary-page text-center mb-6';
+            titleElement.innerHTML = `
+              <h1 class="text-2xl font-bold mb-2">豆豆日记</h1>
+              <p id="diary-date-range" class="text-sm text-gray-600">日期范围</p>
+            `;
+            diaryBook.appendChild(titleElement);
+            
+            // 更新日期范围
+            const dateRangeElement = titleElement.querySelector('#diary-date-range');
+            if (sortedDiaries.length === 0) {
+              dateRangeElement.textContent = '无日记';
+            } else {
+              const firstDate = new Date(sortedDiaries[0].date);
+              const lastDate = new Date(sortedDiaries[sortedDiaries.length - 1].date);
+              
+              const firstDateStr = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+              
+              if (sortedDiaries.length === 1) {
+                dateRangeElement.textContent = firstDateStr;
+              } else {
+                const lastDateStr = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
+                dateRangeElement.textContent = `${firstDateStr} - ${lastDateStr}`;
+              }
+            }
+            
+            // 添加日记页面
+            for (const diary of sortedDiaries) {
+              const users = await DiaryStorage.getUsers();
+              const user = users.find(u => u.id === diary.userId);
+              const userName = user ? user.name : '未知用户';
+              
+              const diaryPage = document.createElement('div');
+              diaryPage.className = 'diary-page';
+              diaryPage.innerHTML = `
+                <div class="diary-date">${diary.date}</div>
+                <h2 class="diary-title">${diary.title}</h2>
+                <div class="diary-author">作者: ${userName}</div>
+                <div class="diary-content">${diary.content}</div>
+              `;
+              
+              // 直接添加到日记书本中
+              diaryBook.appendChild(diaryPage);
+            }
+          } else {
+            // 桌面设备：Turn.js书本效果
+            // 创建封面
+            const frontCover = document.createElement('div');
+            frontCover.className = 'diary-page text-center flex flex-col justify-center items-center';
+            frontCover.innerHTML = `
+              <h1 class="text-4xl font-bold mb-4">豆豆日记</h1>
+              <p class="text-xl mb-8">我的生活记录</p>
+              <p id="diary-date-range" class="text-lg">2025年8月</p>
+            `;
+            
+            // 添加封面
+            diaryBook.appendChild(frontCover);
+            
+            // 更新日期范围显示
+            const dateRangeElement = document.getElementById('diary-date-range');
+            if (dateRangeElement) {
+              if (sortedDiaries.length === 0) {
+                dateRangeElement.textContent = '无日记';
+              } else {
+                const firstDate = new Date(sortedDiaries[0].date);
+                const lastDate = new Date(sortedDiaries[sortedDiaries.length - 1].date);
+                
+                const firstDateStr = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+                
+                if (sortedDiaries.length === 1) {
+                  dateRangeElement.textContent = firstDateStr;
+                } else {
+                  const lastDateStr = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
+                  dateRangeElement.textContent = `${firstDateStr} - ${lastDateStr}`;
+                }
+              }
+            }
+            
+            // 添加日记页面
+            for (const diary of sortedDiaries) {
+              const users = await DiaryStorage.getUsers();
+              const user = users.find(u => u.id === diary.userId);
+              const userName = user ? user.name : '未知用户';
+              
+              const diaryPage = document.createElement('div');
+              diaryPage.className = 'diary-page';
+              diaryPage.innerHTML = `
+                <div class="diary-date">${diary.date}</div>
+                <h2 class="diary-title">${diary.title}</h2>
+                <div class="diary-author">作者: ${userName}</div>
+                <div class="diary-content">${diary.content}</div>
+              `;
+              
+              // 直接添加到日记书本中
+              diaryBook.appendChild(diaryPage);
+            }
+            
+                // 创建封底
+            const backCover = document.createElement('div');
+            backCover.className = 'diary-page text-center flex flex-col justify-center items-center';
+            backCover.innerHTML = `
+              <h2 class="text-2xl font-bold mb-4">感谢阅读</h2>
+              <p>记录生活，珍藏回忆</p>
+            `;
+            
+            // 添加封底
+            diaryBook.appendChild(backCover);
+            
+            // 初始化Turn.js
+            setTimeout(initRealTurnJs, 100);
+          }
         } catch (error) {
           console.error('加载日记失败:', error);
           alert('加载日记失败: ' + error.message);
