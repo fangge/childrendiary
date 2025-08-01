@@ -5,7 +5,7 @@
 class ApiService {
   constructor() {
     // 检测是否在GitHub Pages环境中
-    this.isGitHubPages = window.location.hostname.includes('github.io');
+    this.isGitHubPages = window.location.hostname.includes('mrfangge.com');
     this.baseUrl = 'http://localhost:3001/api';
     
     // 设置静态数据路径
