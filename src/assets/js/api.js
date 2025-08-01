@@ -5,13 +5,25 @@
 class ApiService {
   constructor() {
     // 检测是否在GitHub Pages环境中
-    this.isGitHubPages = window.location.hostname.includes('mrfangge.com');
+    this.isGitHubPages = window.location.hostname.includes('mrfangge.com') || window.location.hostname.includes('github.io');
     this.baseUrl = 'http://localhost:3001/api';
     
     // 设置静态数据路径
     if (this.isGitHubPages) {
       // 在GitHub Pages环境中，使用相对路径
-      this.staticDataPath = './data';
+      // 根据当前页面路径确定正确的相对路径
+      const currentPath = window.location.pathname;
+      console.log('GitHub Pages环境 - 当前页面路径:', currentPath);
+      
+      if (currentPath.includes('/pages/')) {
+        // 如果是在pages目录下的页面，需要返回上一级目录
+        this.staticDataPath = '../data';
+      } else {
+        // 如果是在根目录下的页面
+        this.staticDataPath = './data';
+      }
+      
+      console.log('GitHub Pages环境 - 使用静态数据路径:', this.staticDataPath);
     } else {
       // 在本地开发环境中，使用相对路径
       const currentPath = window.location.pathname;
@@ -165,16 +177,38 @@ class ApiService {
 
     // 只读静态json
     if (endpoint === '/users') {
-      const response = await fetch(`${this.staticDataPath}/users.json`);
-      if (!response.ok) throw new Error(`获取用户数据失败: ${response.status}`);
-      const data = await response.json();
-      return data.users || [];
+      try {
+        const url = `${this.staticDataPath}/users.json`;
+        console.log('尝试获取用户数据:', url);
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.error(`获取用户数据失败: HTTP ${response.status}`);
+          throw new Error(`获取用户数据失败: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('成功获取用户数据:', data);
+        return data.users || [];
+      } catch (error) {
+        console.error('获取用户数据时出错:', error);
+        throw error;
+      }
     }
     if (endpoint === '/diaries') {
-      const response = await fetch(`${this.staticDataPath}/diaries.json`);
-      if (!response.ok) throw new Error(`获取日记数据失败: ${response.status}`);
-      const data = await response.json();
-      return data.diaries || [];
+      try {
+        const url = `${this.staticDataPath}/diaries.json`;
+        console.log('尝试获取日记数据:', url);
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.error(`获取日记数据失败: HTTP ${response.status}`);
+          throw new Error(`获取日记数据失败: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('成功获取日记数据:', data);
+        return data.diaries || [];
+      } catch (error) {
+        console.error('获取日记数据时出错:', error);
+        throw error;
+      }
     }
     return { success: false, error: '不支持的请求' };
   }
