@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日记展示 - 豆豆日记</title>
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <!-- 引入jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- 引入Turn.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  <!-- 引入Day.js -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+  <style>
+    #diary-book {
+      width: 1000px;
+      height: 700px;
+      margin: 0 auto;
+    }
+    .diary-page {
+      background-color: #f9f7f1;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    .diary-content img {
+      max-width: 100%;
+    }
+    .diary-date {
+      font-style: italic;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .diary-title {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .diary-author {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .book-controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .book-controls button {
+      margin: 0 5px;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      #diary-book {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .diary-page {
+        page-break-after: always;
+        height: auto !important;
+        box-shadow: none !important;
+      }
+    }
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      #diary-book {
+        width: 100%;
+        height: 500px;
+      }
+    }
+    /* 确保页脚不会覆盖内容 */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    main {
+      flex: 1;
+      margin-bottom: 60px; /* 为页脚留出空间 */
+    }
+    footer {
+      position: relative;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-blue-600 text-white p-4 shadow-md no-print">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">豆豆日记</h1>
+      <nav class="space-x-4">
+        <a href="../index.html" class="hover:underline">首页</a>
+        <a href="./user-management.html" class="hover:underline">用户管理</a>
+        <a href="./diary-management.html" class="hover:underline">写日记</a>
+        <a href="./diary-display.html" class="hover:underline font-bold">日记展示</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4 mt-8">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print">
+      <h2 class="text-2xl font-semibold mb-6">日记展示</h2>
+      
+      <!-- 筛选条件 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div>
+          <label for="userFilter" class="block text-gray-700 font-medium mb-2">选择用户</label>
+          <select id="userFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">所有用户</option>
+            <!-- 用户选项将通过JavaScript动态添加 -->
+          </select>
+        </div>
+        <div>
+          <label for="startDate" class="block text-gray-700 font-medium mb-2">开始日期</label>
+          <input type="date" id="startDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="endDate" class="block text-gray-700 font-medium mb-2">结束日期</label>
+          <input type="date" id="endDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+      
+      <div class="flex justify-between mb-8">
+        <button id="filterBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">日记筛选</button>
+        <button id="printBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">打印日记</button>
+      </div>
+    </div>
+
+    <!-- 日记书本展示 -->
+    <div id="diary-container" class="mb-8">
+      <div id="diary-book">
+        <!-- 封面 -->
+        <div class="diary-page text-center flex flex-col justify-center items-center">
+          <h1 class="text-4xl font-bold mb-4">豆豆日记</h1>
+          <p class="text-xl mb-8">我的生活记录</p>
+          <p id="diary-date-range" class="text-lg">2025年8月</p>
+        </div>
+        
+        <!-- 日记内容将通过JavaScript动态添加 -->
+        
+        <!-- 封底 -->
+        <div class="diary-page text-center flex flex-col justify-center items-center">
+          <h2 class="text-2xl font-bold mb-4">感谢阅读</h2>
+          <p>记录生活，珍藏回忆</p>
+        </div>
+      </div>
+      
+      <!-- 书本控制按钮 -->
+      <div class="book-controls no-print">
+        <button id="prevBtn" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition">上一页</button>
+        <span id="pageNum" class="mx-4">第 <span id="currentPage">1</span> / <span id="totalPages">3</span> 页</span>
+        <button id="nextBtn" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition">下一页</button>
+      </div>
+    </div>
+    
+    <!-- 无日记提示 -->
+    <div id="noDiariesMessage" class="bg-white rounded-lg shadow-md p-6 text-center hidden">
+      <p class="text-gray-500 text-lg">没有找到符合条件的日记</p>
+      <a href="./diary-management.html" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">去写一篇日记</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white p-4 mt-8 no-print">
+    <div class="container mx-auto text-center">
+      <p>© 2025 豆豆日记 - 记录美好生活的每一天</p>
+    </div>
+  </footer>
+
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入API服务 -->
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const userFilter = document.getElementById('userFilter');
+      const startDate = document.getElementById('startDate');
+      const endDate = document.getElementById('endDate');
+      const filterBtn = document.getElementById('filterBtn');
+      const printBtn = document.getElementById('printBtn');
+      const diaryBook = document.getElementById('diary-book');
+      const diaryContainer = document.getElementById('diary-container');
+      const noDiariesMessage = document.getElementById('noDiariesMessage');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const currentPage = document.getElementById('currentPage');
+      const totalPages = document.getElementById('totalPages');
+      const diaryDateRange = document.getElementById('diary-date-range');
+      
+      // 初始化Turn.js实例变量
+      let turnInstance = null;
+      
+      // 加载用户选项
+      async function loadUserOptions() {
+        try {
+          const users = await DiaryStorage.getUsers();
+          userFilter.innerHTML = '<option value="">所有用户</option>';
+          
+          users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.textContent = user.name;
+            userFilter.appendChild(option);
+          });
+        } catch (error) {
+          console.error('加载用户选项失败:', error);
+          alert('加载用户选项失败，请检查服务器连接');
+        }
+      }
+      
+      // 初始化Turn.js
+      function initTurnJs() {
+        if (turnInstance) {
+          // 销毁现有实例
+          turnInstance.destroy();
+        }
+        
+        turnInstance = $('#diary-book').turn({
+          width: 800,
+          height: 600,
+          autoCenter: true,
+          gradients: true,
+          acceleration: true,
+          elevation: 50,
+          when: {
+            turning: function(e, page, view) {
+              currentPage.textContent = page;
+            }
+          }
+        });
+        
+        // 更新总页数
+        const totalPagesCount = $('#diary-book').turn('pages');
+        totalPages.textContent = totalPagesCount;
+        currentPage.textContent = $('#diary-book').turn('page');
+      }
+      
+      // 加载日记数据
+      async function loadDiaries() {
+        try {
+          // 销毁现有的Turn.js实例
+          try {
+            if (turnInstance && typeof $(diaryBook).turn === 'function' && $(diaryBook).data() && $(diaryBook).data().turn) {
+              $(diaryBook).turn("destroy");
+            }
+          } catch (error) {
+            console.log("销毁Turn.js实例时出错:", error);
+          }
+          
+          const userId = userFilter.value;
+          const startDateValue = startDate.value;
+          const endDateValue = endDate.value;
+          
+          // 获取所有日记
+          let allDiaries = await DiaryStorage.getDiaries();
+          
+          // 手动筛选日记
+          let filteredDiaries = allDiaries.filter(diary => {
+            // 用户筛选
+            if (userId && diary.userId !== userId) {
+              return false;
+            }
+            
+            // 日期筛选
+            if (startDateValue || endDateValue) {
+              // 将日记日期字符串转换为YYYY-MM-DD格式进行比较
+              // 这样可以确保我们只比较日期部分，忽略时间部分
+              const diaryDateStr = diary.date.split('T')[0];
+              
+              if (startDateValue && diaryDateStr < startDateValue) {
+                return false;
+              }
+              
+              if (endDateValue && diaryDateStr > endDateValue) {
+                return false;
+              }
+            }
+            
+            return true;
+          });
+        
+        console.log("筛选条件:", { userId, startDateValue, endDateValue });
+        console.log("筛选后的日记:", filteredDiaries);
+        
+        // 按日期排序
+        const sortedDiaries = filteredDiaries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // 更新日期范围显示
+        updateDateRangeDisplay(sortedDiaries);
+        
+        // 清除现有日记页面（保留封面和封底）
+        // 获取所有日记页面
+        const pages = Array.from(diaryBook.querySelectorAll('.diary-page'));
+        
+        // 如果有超过2个页面（封面和封底），则删除中间的日记页面
+        if (pages.length > 2) {
+          // 保留第一个（封面）和最后一个（封底）
+          const pagesToRemove = pages.slice(1, pages.length - 1);
+          pagesToRemove.forEach(page => {
+            if (page && page.parentNode === diaryBook) {
+              diaryBook.removeChild(page);
+            }
+          });
+        }
+        
+        if (sortedDiaries.length === 0) {
+          // 显示无日记提示
+          diaryContainer.classList.add('hidden');
+          noDiariesMessage.classList.remove('hidden');
+          return;
+        }
+        
+        // 显示日记容器
+        diaryContainer.classList.remove('hidden');
+        noDiariesMessage.classList.add('hidden');
+        
+        // 完全重建日记书本
+        // 保留第一个元素（如果存在）作为封面
+        let frontCover = null;
+        if (pages.length >= 1) {
+          frontCover = pages[0];
+        }
+        
+        // 清空日记书本
+        diaryBook.innerHTML = '';
+        
+        // 如果没有封面或者封面被清除了，创建一个新的封面
+        if (!frontCover) {
+          frontCover = document.createElement('div');
+          frontCover.className = 'diary-page text-center flex flex-col justify-center items-center';
+          frontCover.innerHTML = `
+            <h1 class="text-4xl font-bold mb-4">豆豆日记</h1>
+            <p class="text-xl mb-8">我的生活记录</p>
+            <p id="diary-date-range" class="text-lg">2025年8月</p>
+          `;
+        }
+        
+        // 添加封面
+        diaryBook.appendChild(frontCover);
+        
+        // 更新日期范围显示（因为我们可能已经清除了原来的元素）
+        const dateRangeElement = document.getElementById('diary-date-range');
+        if (dateRangeElement) {
+          if (sortedDiaries.length === 0) {
+            dateRangeElement.textContent = '无日记';
+          } else {
+            const firstDate = new Date(sortedDiaries[0].date);
+            const lastDate = new Date(sortedDiaries[sortedDiaries.length - 1].date);
+            
+            const firstDateStr = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+            
+            if (sortedDiaries.length === 1) {
+              dateRangeElement.textContent = firstDateStr;
+            } else {
+              const lastDateStr = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
+              dateRangeElement.textContent = `${firstDateStr} - ${lastDateStr}`;
+            }
+          }
+        }
+        
+        // 添加日记页面
+        for (const diary of sortedDiaries) {
+          const users = await DiaryStorage.getUsers();
+          const user = users.find(u => u.id === diary.userId);
+          const userName = user ? user.name : '未知用户';
+          
+          const diaryPage = document.createElement('div');
+          diaryPage.className = 'diary-page';
+          diaryPage.innerHTML = `
+            <div class="diary-date">${diary.date}</div>
+            <h2 class="diary-title">${diary.title}</h2>
+            <div class="diary-author">作者: ${userName}</div>
+            <div class="diary-content">${diary.content}</div>
+          `;
+          
+          // 直接添加到日记书本中
+          diaryBook.appendChild(diaryPage);
+        }
+        
+        // 创建封底
+        const backCover = document.createElement('div');
+        backCover.className = 'diary-page text-center flex flex-col justify-center items-center';
+        backCover.innerHTML = `
+          <h2 class="text-2xl font-bold mb-4">感谢阅读</h2>
+          <p>记录生活，珍藏回忆</p>
+        `;
+        
+        // 添加封底
+        diaryBook.appendChild(backCover);
+        
+        // 初始化Turn.js
+        setTimeout(initRealTurnJs, 100);
+        } catch (error) {
+          console.error('加载日记失败:', error);
+          alert('加载日记失败: ' + error.message);
+        }
+      }
+      
+      // 更新日期范围显示
+      function updateDateRangeDisplay(diaries) {
+        if (diaries.length === 0) {
+          diaryDateRange.textContent = '无日记';
+          return;
+        }
+        
+        const firstDate = new Date(diaries[0].date);
+        const lastDate = new Date(diaries[diaries.length - 1].date);
+        
+        const firstDateStr = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+        
+        if (diaries.length === 1) {
+          diaryDateRange.textContent = firstDateStr;
+        } else {
+          const lastDateStr = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
+          diaryDateRange.textContent = `${firstDateStr} - ${lastDateStr}`;
+        }
+      }
+      
+      // 翻页按钮事件
+      prevBtn.addEventListener('click', function() {
+        $('#diary-book').turn('previous');
+      });
+      
+      nextBtn.addEventListener('click', function() {
+        $('#diary-book').turn('next');
+      });
+      
+      // 筛选按钮事件
+      filterBtn.addEventListener('click', async function() {
+        try {
+          await loadDiaries();
+        } catch (error) {
+          console.error('筛选日记失败:', error);
+          alert('筛选日记失败，请检查服务器连接');
+        }
+      });
+      
+      // 打印按钮事件
+      printBtn.addEventListener('click', function() {
+        DiaryUtils.printDiary();
+      });
+      
+      // 初始加载
+      try {
+        await loadUserOptions();
+      } catch (error) {
+        console.error('初始化失败:', error);
+      }
+      
+      // 使用真实的Turn.js库
+      // 使用真实的Turn.js库
+      function initRealTurnJs() {
+        // 确保之前的实例被销毁
+        try {
+          if (turnInstance && typeof $(diaryBook).turn === 'function' && $(diaryBook).data() && $(diaryBook).data().turn) {
+            $(diaryBook).turn("destroy");
+            // 给DOM一点时间重置
+            setTimeout(() => {
+              initTurnJsInstance();
+            }, 100);
+            return;
+          }
+        } catch (error) {
+          console.log("销毁Turn.js实例时出错:", error);
+        }
+        
+        // 如果没有现有实例或销毁失败，直接初始化
+        initTurnJsInstance();
+      }
+      
+      // 初始化Turn.js实例的具体实现
+      function initTurnJsInstance() {
+        
+        // 确保元素存在且可见
+        if (!$(diaryBook).is(":visible")) {
+          $(diaryBook).show();
+        }
+        
+        // 根据屏幕宽度确定书本尺寸
+        let width, height;
+        
+        if (window.innerWidth > 1200) {
+          // 大屏幕设备
+          width = 1000;
+          height = 700;
+        } else if (window.innerWidth > 768) {
+          // 平板设备
+          width = 800;
+          height = 600;
+        } else {
+          // 移动设备
+          width = window.innerWidth - 40;
+          height = 500;
+        }
+        
+        // 初始化Turn.js
+        turnInstance = $(diaryBook).turn({
+          width: width,
+          height: height,
+          autoCenter: true,
+          gradients: true,
+          acceleration: true,
+          elevation: 50,
+          display: 'double', // 确保双页显示
+          when: {
+            turning: function(event, page, view) {
+              currentPage.textContent = page;
+            },
+            turned: function(event, page, view) {
+              currentPage.textContent = page;
+              // 确保可以翻到最后一页
+              if (page == $(diaryBook).turn("pages")) {
+                console.log("已到达最后一页");
+              }
+            }
+          }
+        });
+        
+        // 更新总页数
+        totalPages.textContent = $(diaryBook).turn("pages");
+      }
+      
+      // 监听窗口大小变化，调整书本大小
+      window.addEventListener('resize', function() {
+        try {
+          if (turnInstance && $(diaryBook).data() && $(diaryBook).data().turn) {
+            let width, height;
+            
+            if (window.innerWidth > 1200) {
+              width = 1000;
+              height = 700;
+            } else if (window.innerWidth > 768) {
+              width = 800;
+              height = 600;
+            } else {
+              width = window.innerWidth - 40;
+              height = 500;
+            }
+            
+            $(diaryBook).turn('size', width, height);
+          }
+        } catch (error) {
+          console.log("调整Turn.js大小时出错:", error);
+        }
+      });
+      
+      // 初始加载
+      try {
+        await loadDiaries();
+      } catch (error) {
+        console.error('加载日记失败:', error);
+        alert('加载日记失败，请检查服务器连接');
+      }
+    });
+  </script>
+</body>
+</html>
