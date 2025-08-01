@@ -36,8 +36,8 @@ pnpm install
 ### 开发模式
 
 ```bash
-# 启动开发服务器
-pnpm dev
+# 一键启动后端和前端开发服务器
+pnpm start
 ```
 
 然后在浏览器中访问 http://localhost:3000
