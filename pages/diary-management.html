@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>写日记 - 豆豆日记</title>
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <!-- 引入Quill富文本编辑器 -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.min.js"></script>
+  <!-- 引入Day.js -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-blue-600 text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">豆豆日记</h1>
+      <nav class="space-x-4">
+        <a href="../index.html" class="hover:underline">首页</a>
+        <a href="./user-management.html" class="hover:underline">用户管理</a>
+        <a href="./diary-management.html" class="hover:underline font-bold">写日记</a>
+        <a href="./diary-display.html" class="hover:underline">日记展示</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4 mt-8">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-6">写日记</h2>
+      
+      <!-- 日记表单 -->
+      <form id="diaryForm" class="mb-8">
+        <input type="hidden" id="diaryId">
+        
+        <div class="mb-4">
+          <label for="userSelect" class="block text-gray-700 font-medium mb-2">选择用户</label>
+          <select id="userSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <option value="">-- 请选择用户 --</option>
+            <!-- 用户选项将通过JavaScript动态添加 -->
+          </select>
+          <p id="noUsersWarning" class="text-red-500 mt-1 hidden">没有可用的用户，请先<a href="./user-management.html" class="underline">创建用户</a></p>
+        </div>
+        
+        <div class="mb-4">
+          <label for="diaryDate" class="block text-gray-700 font-medium mb-2">日期</label>
+          <input type="date" id="diaryDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="diaryTitle" class="block text-gray-700 font-medium mb-2">标题</label>
+          <input type="text" id="diaryTitle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        
+        <div class="mb-6">
+          <label for="editor" class="block text-gray-700 font-medium mb-2">内容</label>
+          <div id="editor" class="h-64 border border-gray-300 rounded-md"></div>
+        </div>
+        
+        <div class="flex space-x-4">
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">保存日记</button>
+          <button type="button" id="resetBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">重置</button>
+        </div>
+      </form>
+
+      <!-- 最近日记列表 -->
+      <div>
+        <h3 class="text-xl font-semibold mb-4">最近日记</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="py-2 px-4 border-b text-left">日期</th>
+                <th class="py-2 px-4 border-b text-left">用户</th>
+                <th class="py-2 px-4 border-b text-left">标题</th>
+                <th class="py-2 px-4 border-b text-left">操作</th>
+              </tr>
+            </thead>
+            <tbody id="diaryTableBody">
+              <!-- 日记数据将通过JavaScript动态添加 -->
+            </tbody>
+          </table>
+        </div>
+        <div id="noDiariesMessage" class="text-gray-500 italic mt-4 hidden">暂无日记数据</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white p-4 mt-8">
+    <div class="container mx-auto text-center">
+      <p>© 2025 豆豆日记 - 记录美好生活的每一天</p>
+    </div>
+  </footer>
+
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入API服务 -->
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const diaryForm = document.getElementById('diaryForm');
+      const diaryIdInput = document.getElementById('diaryId');
+      const userSelect = document.getElementById('userSelect');
+      const noUsersWarning = document.getElementById('noUsersWarning');
+      const diaryDate = document.getElementById('diaryDate');
+      const diaryTitle = document.getElementById('diaryTitle');
+      const resetBtn = document.getElementById('resetBtn');
+      const diaryTableBody = document.getElementById('diaryTableBody');
+      const noDiariesMessage = document.getElementById('noDiariesMessage');
+      
+      // 创建自定义图片上传处理器
+      class ImageUploader {
+        constructor(quill) {
+          this.quill = quill;
+          this.fileInput = document.createElement('input');
+          this.fileInput.setAttribute('type', 'file');
+          this.fileInput.setAttribute('accept', 'image/*');
+          this.fileInput.style.display = 'none';
+          
+          document.body.appendChild(this.fileInput);
+          
+          this.fileInput.addEventListener('change', this.handleFileChange.bind(this));
+        }
+        
+        handleFileChange() {
+          const file = this.fileInput.files[0];
+          if (file) {
+            this.uploadImage(file);
+          }
+        }
+        
+        async uploadImage(file) {
+          // 保存当前选择位置
+          const range = this.quill.getSelection(true);
+          const insertPosition = range ? range.index : 0;
+          
+          // 显示上传中提示
+          const loadingText = '上传图片中...';
+          this.quill.insertText(insertPosition, loadingText, 'api', true);
+          
+          try {
+            // 调用API上传图片
+            const result = await apiService.uploadImage(file);
+            
+            // 删除上传中提示
+            this.quill.deleteText(insertPosition, loadingText.length);
+            
+            if (result && result.success && result.imageUrl) {
+              // 插入图片
+              this.quill.insertEmbed(insertPosition, 'image', `http://localhost:3001${result.imageUrl}`);
+              
+              // 移动光标到图片后面
+              this.quill.setSelection(insertPosition + 1);
+            } else {
+              throw new Error('上传成功但返回数据格式不正确');
+            }
+          } catch (error) {
+            // 删除上传中提示
+            this.quill.deleteText(insertPosition, loadingText.length);
+            
+            // 在编辑器中插入错误提示
+            this.quill.insertText(insertPosition, '图片上传失败 - ', 'api', true);
+            
+            console.error('图片上传失败:', error);
+            alert('图片上传失败: ' + (error.message || '未知错误'));
+          } finally {
+            // 重置文件输入框
+            this.fileInput.value = '';
+          }
+        }
+        
+        openFileDialog() {
+          this.fileInput.click();
+        }
+      }
+      
+      // 初始化富文本编辑器
+      const quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: '写下今天的故事...',
+        modules: {
+          toolbar: {
+            container: [
+              ['bold', 'italic', 'underline', 'strike'],
+              ['blockquote', 'code-block'],
+              [{ 'header': 1 }, { 'header': 2 }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              [{ 'script': 'sub' }, { 'script': 'super' }],
+              [{ 'indent': '-1' }, { 'indent': '+1' }],
+              [{ 'direction': 'rtl' }],
+              [{ 'size': ['small', false, 'large', 'huge'] }],
+              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }],
+              [{ 'align': [] }],
+              ['image'],
+              ['clean']
+            ],
+            handlers: {
+              image: function() {
+                // 这里会被我们的自定义处理器覆盖
+              }
+            }
+          }
+        }
+      });
+      
+      // 初始化图片上传器
+      const imageUploader = new ImageUploader(quill);
+      
+      // 覆盖Quill默认的图片处理器
+      quill.getModule('toolbar').handlers.image = () => {
+        imageUploader.openFileDialog();
+      };
+      
+      // 设置默认日期为今天
+      diaryDate.value = DiaryUtils.getCurrentDate();
+      
+      // 加载用户选项
+      async function loadUserOptions() {
+        try {
+          const users = await DiaryStorage.getUsers();
+          userSelect.innerHTML = '<option value="">-- 请选择用户 --</option>';
+          
+          if (users.length === 0) {
+            noUsersWarning.classList.remove('hidden');
+            userSelect.disabled = true;
+          } else {
+            noUsersWarning.classList.add('hidden');
+            userSelect.disabled = false;
+            
+            users.forEach(user => {
+              const option = document.createElement('option');
+              option.value = user.id;
+              option.textContent = user.name;
+              userSelect.appendChild(option);
+            });
+          }
+        } catch (error) {
+          console.error('加载用户选项失败:', error);
+          alert('加载用户选项失败，请检查服务器连接');
+        }
+      }
+      
+      // 加载日记列表
+      async function loadDiaries() {
+        try {
+          const diaries = await DiaryStorage.getDiaries();
+          const users = await DiaryStorage.getUsers();
+          diaryTableBody.innerHTML = '';
+          
+          if (diaries.length === 0) {
+            noDiariesMessage.classList.remove('hidden');
+          } else {
+            noDiariesMessage.classList.add('hidden');
+            
+            // 按日期降序排序
+            const sortedDiaries = diaries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 只显示最近10条
+            const recentDiaries = sortedDiaries.slice(0, 10);
+            
+            recentDiaries.forEach(diary => {
+              const user = users.find(u => u.id === diary.userId);
+              const userName = user ? user.name : '未知用户';
+              
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td class="py-2 px-4 border-b">${diary.date}</td>
+                <td class="py-2 px-4 border-b">${userName}</td>
+                <td class="py-2 px-4 border-b">${diary.title}</td>
+                <td class="py-2 px-4 border-b">
+                  <button class="text-blue-600 hover:text-blue-800 mr-2 edit-btn" data-id="${diary.id}">编辑</button>
+                  <button class="text-red-600 hover:text-red-800 delete-btn" data-id="${diary.id}">删除</button>
+                </td>
+              `;
+              diaryTableBody.appendChild(row);
+            });
+            
+            // 添加编辑按钮事件
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const diaryId = this.getAttribute('data-id');
+                editDiary(diaryId);
+              });
+            });
+            
+            // 添加删除按钮事件
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+              btn.addEventListener('click', async function() {
+                const diaryId = this.getAttribute('data-id');
+                if (confirm('确定要删除这篇日记吗？')) {
+                  try {
+                    await DiaryStorage.deleteDiary(diaryId);
+                    loadDiaries();
+                  } catch (error) {
+                    alert('删除日记失败: ' + error.message);
+                  }
+                }
+              });
+            });
+          }
+        } catch (error) {
+          console.error('加载日记列表失败:', error);
+          alert('加载日记列表失败，请检查服务器连接');
+        }
+      }
+      
+      // 编辑日记
+      async function editDiary(diaryId) {
+        try {
+          const diaries = await DiaryStorage.getDiaries();
+          const diary = diaries.find(d => d.id === diaryId);
+          
+          if (diary) {
+            diaryIdInput.value = diary.id;
+            userSelect.value = diary.userId;
+            diaryDate.value = diary.date;
+            diaryTitle.value = diary.title;
+            
+            // 设置富文本编辑器内容
+            quill.root.innerHTML = diary.content;
+            
+            // 滚动到表单顶部
+            diaryForm.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (error) {
+          console.error('编辑日记失败:', error);
+          alert('获取日记信息失败');
+        }
+      }
+      
+      // 重置表单
+      function resetForm() {
+        diaryForm.reset();
+        diaryIdInput.value = '';
+        diaryDate.value = DiaryUtils.getCurrentDate();
+        quill.root.innerHTML = '';
+      }
+      
+      // 表单提交处理
+      diaryForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const diaryId = diaryIdInput.value;
+        const userId = userSelect.value;
+        const date = diaryDate.value;
+        const title = diaryTitle.value;
+        const content = quill.root.innerHTML;
+        
+        if (!userId) {
+          alert('请选择用户');
+          return;
+        }
+        
+        if (!title.trim()) {
+          alert('请输入日记标题');
+          return;
+        }
+        
+        if (quill.getText().trim().length <= 1) { // Quill会有一个换行符
+          alert('请输入日记内容');
+          return;
+        }
+        
+        const diaryData = {
+          userId: userId,
+          date: date,
+          title: title,
+          content: content
+        };
+        
+        try {
+          if (diaryId) {
+            // 更新现有日记
+            await DiaryStorage.updateDiary(diaryId, diaryData);
+          } else {
+            // 添加新日记
+            await DiaryStorage.saveDiary(diaryData);
+          }
+          
+          resetForm();
+          loadDiaries();
+          
+          alert('日记保存成功！');
+        } catch (error) {
+          console.error('保存日记失败:', error);
+          alert('保存日记失败: ' + error.message);
+        }
+      });
+      
+      // 重置按钮事件
+      resetBtn.addEventListener('click', resetForm);
+      
+      // 初始加载
+      loadUserOptions();
+      loadDiaries();
+    });
+  </script>
+</body>
+</html>
