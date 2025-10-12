@@ -149,7 +149,7 @@
 
             if (result && result.success && result.imageUrl) {
               // 插入图片
-              this.quill.insertEmbed(insertPosition, 'image', `http://localhost:3001${result.imageUrl}`);
+              this.quill.insertEmbed(insertPosition, 'image', `http://localhost:3000${result.imageUrl}`);
 
               // 移动光标到图片后面
               this.quill.setSelection(insertPosition + 1);
