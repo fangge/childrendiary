@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import LayoutGithub from './components/LayoutGithub';
-import Home from './pages/Home';
+import HomeGithub from './pages/HomeGithub';
 
 const App = () => {
   return (
@@ -12,7 +12,7 @@ const App = () => {
         <BrowserRouter basename={import.meta.env.BASE_URL || '/'}>
           <Routes>
             <Route path="/" element={<LayoutGithub />}>
-              <Route index element={<Home />} />
+              <Route index element={<HomeGithub />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
