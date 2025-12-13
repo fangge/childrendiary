@@ -37,3 +37,4 @@ Thumbs.db
 .cache/
 .pnpm-store/
 node_modules
+.hy-code

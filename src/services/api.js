@@ -5,40 +5,20 @@
 class ApiService {
   constructor() {
     // 检测是否在GitHub Pages环境中
-    this.isGitHubPages = window.location.hostname.includes('mrfangge.com') || window.location.hostname.includes('github.io');
+    this.isGitHubPages = window.location.hostname.includes('mrfangge.com') || 
+                         window.location.hostname.includes('github.io');
     this.baseUrl = 'http://localhost:3001/api';
     
     // 设置静态数据路径
     if (this.isGitHubPages) {
       // 在GitHub Pages环境中，使用相对路径
-      // 根据当前页面路径确定正确的相对路径
-      const currentPath = window.location.pathname;
-      console.log('GitHub Pages环境 - 当前页面路径:', currentPath);
-      
-      if (currentPath.includes('/pages/')) {
-        // 如果是在pages目录下的页面，需要返回上一级目录
-        this.staticDataPath = '../data';
-      } else {
-        // 如果是在根目录下的页面
-        this.staticDataPath = './data';
-      }
-      
+      const basePath = process.env.PUBLIC_PATH || '/';
+      this.staticDataPath = `${basePath}data`;
       console.log('GitHub Pages环境 - 使用静态数据路径:', this.staticDataPath);
     } else {
-      // 在本地开发环境中，使用相对路径
-      const currentPath = window.location.pathname;
-      console.log('当前页面路径:', currentPath);
-      
-      // 根据当前页面路径确定正确的相对路径
-      if (currentPath.includes('/pages/')) {
-        // 如果是在pages目录下的页面，需要多上一级目录
-        this.staticDataPath = '../../server/data';
-      } else {
-        // 如果是在根目录下的页面
-        this.staticDataPath = './server/data';
-      }
-      
-      console.log('本地开发环境：使用静态数据路径:', this.staticDataPath);
+      // 在本地开发环境中，通过代理访问
+      this.staticDataPath = '/data';
+      console.log('本地开发环境 - 使用静态数据路径:', this.staticDataPath);
     }
   }
   
@@ -54,12 +34,12 @@ class ApiService {
     }
     
     // 验证文件大小 (限制为5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       throw new Error(`图片大小不能超过5MB (当前大小: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
     }
     
-    // 在GitHub Pages环境中，由于无法保存文件，返回一个模拟的成功响应
+    // 在GitHub Pages环境中，返回Base64编码
     if (this.isGitHubPages) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -69,7 +49,7 @@ class ApiService {
             resolve({
               success: true,
               imageId: imageId,
-              url: reader.result // 返回Base64编码的图片数据
+              url: reader.result
             });
           } catch (error) {
             reject(new Error('处理图片失败: ' + error.message));
@@ -153,9 +133,9 @@ class ApiService {
     } catch (error) {
       console.error(`API请求错误 (${url}):`, error);
       
-      // 如果服务器连接失败，尝试从本地JSON文件获取数据（开发环境备用方案）
+      // 如果服务器连接失败，尝试从本地JSON文件获取数据
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        console.warn('服务器连接失败，尝试从本地JSON文件获取数据');
+        console.warn('服务器连接失败，尝试从静态JSON文件获取数据');
         return this.handleStaticDataRequest(endpoint, method, data);
       }
       
@@ -167,15 +147,10 @@ class ApiService {
   async handleStaticDataRequest(endpoint, method, data) {
     // 只允许GET请求
     if (method !== 'GET') {
-      return { success: false, error: `GitHub Pages环境只支持GET请求` };
+      return { success: false, error: `静态环境只支持GET请求` };
     }
 
-    // 只在GitHub Pages环境下生效
-    if (!this.isGitHubPages) {
-      throw new Error('本地开发环境不应调用handleStaticDataRequest');
-    }
-
-    // 只读静态json
+    // 获取用户数据
     if (endpoint === '/users') {
       try {
         const url = `${this.staticDataPath}/users.json`;
@@ -193,6 +168,8 @@ class ApiService {
         throw error;
       }
     }
+    
+    // 获取日记数据
     if (endpoint === '/diaries') {
       try {
         const url = `${this.staticDataPath}/diaries.json`;
@@ -210,6 +187,7 @@ class ApiService {
         throw error;
       }
     }
+    
     return { success: false, error: '不支持的请求' };
   }
 
@@ -250,3 +228,5 @@ class ApiService {
 
 // 创建单例实例
 const apiService = new ApiService();
+
+export default apiService;
