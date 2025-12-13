@@ -8,7 +8,7 @@
     "server": "node server/index.js",
     "start": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "NODE_ENV=production rspack build --mode production",
-    "build:github": "NODE_ENV=production PUBLIC_PATH=/childrendiary/ rspack build --mode production --config rspack.config.github.js",
+    "build:github": "NODE_ENV=production PUBLIC_PATH=/ rspack build --mode production --config rspack.config.github.js",
     "deploy": "npm run build:github && gh-pages -d dist",
     "start:prod": "node server/production.js",
     "preview": "npm run build && npm run start:prod",
