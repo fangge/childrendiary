@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { DateUtils } from '../utils/helpers';
 import api from '../services/api';
+import '../styles/book.css';
 
 const HomeGithub = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [diaries, setDiaries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('timeline'); // timeline, grid
-  const [selectedMonth, setSelectedMonth] = useState(DateUtils.getCurrentDate().substring(0, 7));
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
 
   // 加载所有用户
   useEffect(() => {
@@ -42,7 +43,12 @@ const HomeGithub = () => {
     try {
       setLoading(true);
       const data = await api.getDiaries(userId);
-      setDiaries(data.sort((a, b) => new Date(b.date) - new Date(a.date)));
+      // 按日期倒序排序，最新的日记在前面
+      const sortedDiaries = data.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
+      setDiaries(sortedDiaries);
+      setCurrentPage(0); // 切换用户时重置到第一页
     } catch (error) {
       console.error('加载日记失败:', error);
     } finally {
@@ -50,17 +56,21 @@ const HomeGithub = () => {
     }
   };
 
-  const getDiariesByMonth = () => {
-    return diaries.filter(diary => diary.date.startsWith(selectedMonth));
+  const handlePageTurn = (direction) => {
+    if (isFlipping) return;
+    
+    setIsFlipping(true);
+    const newPage = direction === 'next' 
+      ? Math.min(currentPage + 1, Math.ceil(diaries.length / 2) - 1)
+      : Math.max(currentPage - 1, 0);
+    
+    setCurrentPage(newPage);
+    setTimeout(() => setIsFlipping(false), 600);
   };
 
-  const getMonthlyStats = () => {
-    const monthDiaries = getDiariesByMonth();
-    return {
-      total: monthDiaries.length,
-      withImages: monthDiaries.filter(d => d.images && d.images.length > 0).length,
-      totalWords: monthDiaries.reduce((sum, d) => sum + d.content.length, 0)
-    };
+  const getCurrentPageDiaries = () => {
+    const startIndex = currentPage * 2;
+    return diaries.slice(startIndex, startIndex + 2);
   };
 
   const getCurrentUser = () => {
@@ -92,31 +102,62 @@ const HomeGithub = () => {
     );
   }
 
-  const monthDiaries = getDiariesByMonth();
-  const stats = getMonthlyStats();
+  if (diaries.length === 0) {
+    const currentUser = getCurrentUser();
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
+          <div className="mb-6">
+            <svg className="w-24 h-24 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">还没有日记</h2>
+          <p className="text-gray-600 mb-6">{currentUser?.name} 还没有记录日记</p>
+          {users.length > 1 && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">切换用户:</label>
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              >
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const pageDiaries = getCurrentPageDiaries();
+  const totalPages = Math.ceil(diaries.length / 2);
   const currentUser = getCurrentUser();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 md:py-8 px-2 md:px-4">
       <div className="max-w-7xl mx-auto">
-        {/* 头部 - 用户选择器 */}
-        <div className="bg-white rounded-xl shadow-md p-4 md:p-6 mb-4 md:mb-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                {currentUser?.name} 的成长日记
-              </h1>
-              <p className="text-sm md:text-base text-gray-600">记录美好生活的每一天</p>
-            </div>
-            
-            {/* 用户选择器 */}
-            {users.length > 1 && (
-              <div className="w-full md:w-auto">
-                <label className="block text-sm font-medium text-gray-700 mb-2">切换用户:</label>
+        {/* 头部信息 */}
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
+            {currentUser?.name} 的成长日记
+          </h1>
+          <p className="text-sm md:text-base text-gray-600">共 {diaries.length} 篇日记</p>
+          
+          {/* 用户选择器 */}
+          {users.length > 1 && (
+            <div className="mt-4 flex justify-center">
+              <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-md">
+                <label className="text-sm font-medium text-gray-700">切换用户:</label>
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="px-3 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white text-sm"
                 >
                   {users.map(user => (
                     <option key={user.id} value={user.id}>
@@ -125,188 +166,95 @@ const HomeGithub = () => {
                   ))}
                 </select>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* 视图切换和月份选择 */}
-        <div className="bg-white rounded-xl shadow-md p-4 md:p-6 mb-4 md:mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            {/* 视图模式 */}
-            <div className="flex gap-2 w-full md:w-auto">
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  viewMode === 'timeline'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                时间线
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  viewMode === 'grid'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                网格
-              </button>
-            </div>
-
-            {/* 月份选择 */}
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">选择月份:</label>
-              <input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="flex-1 md:flex-none px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* 统计信息 */}
-          <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-3 gap-2 md:gap-4">
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-indigo-600">{stats.total}</div>
-              <div className="text-xs md:text-sm text-gray-600">篇日记</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-green-600">{stats.withImages}</div>
-              <div className="text-xs md:text-sm text-gray-600">含图片</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl md:text-2xl font-bold text-purple-600">{stats.totalWords}</div>
-              <div className="text-xs md:text-sm text-gray-600">总字数</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 日记内容 */}
-        {monthDiaries.length === 0 ? (
-          <div className="text-center py-12 md:py-16 bg-white rounded-2xl shadow-xl">
-            <svg className="w-16 h-16 md:w-24 md:h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">这个月还没有日记</h3>
-            <p className="text-sm md:text-base text-gray-500">选择其他月份查看</p>
-          </div>
-        ) : viewMode === 'timeline' ? (
-          <TimelineView diaries={monthDiaries} />
-        ) : (
-          <GridView diaries={monthDiaries} />
-        )}
-      </div>
-    </div>
-  );
-};
-
-// 时间线视图组件
-const TimelineView = ({ diaries }) => {
-  return (
-    <div className="relative">
-      {/* 时间线 - 在移动端隐藏 */}
-      <div className="hidden md:block absolute left-8 top-0 bottom-0 w-0.5 bg-indigo-200"></div>
-
-      <div className="space-y-6 md:space-y-8">
-        {diaries.map((diary) => (
-          <div key={diary.id} className="relative md:pl-20">
-            {/* 时间点 - 在移动端隐藏 */}
-            <div className="hidden md:block absolute left-5 top-0 w-6 h-6 bg-indigo-600 rounded-full border-4 border-white shadow-md"></div>
-
-            {/* 日记卡片 */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden">
-              <div className="p-4 md:p-6">
-                {/* 日期 */}
-                <div className="text-sm md:text-base text-indigo-600 font-semibold mb-2">
-                  {DateUtils.formatReadableDate(diary.date)}
-                </div>
-
-                {/* 标题 */}
-                {diary.title && (
-                  <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-3">
-                    {diary.title}
-                  </h3>
-                )}
-
-                {/* 内容 */}
-                <div
-                  className="text-sm md:text-base text-gray-700 leading-relaxed mb-4 prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: diary.content }}
-                />
-
-                {/* 图片 */}
-                {diary.images && diary.images.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {diary.images.map((image, imgIndex) => (
-                      <img
-                        key={imgIndex}
-                        src={image}
-                        alt={`日记图片 ${imgIndex + 1}`}
-                        className="w-full h-32 md:h-40 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(image, '_blank')}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// 网格视图组件
-const GridView = ({ diaries }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-      {diaries.map((diary) => (
-        <div
-          key={diary.id}
-          className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden"
-        >
-          {/* 图片 */}
-          {diary.images && diary.images.length > 0 && (
-            <div className="relative h-40 md:h-48 bg-gray-100">
-              <img
-                src={diary.images[0]}
-                alt="日记图片"
-                className="w-full h-full object-cover"
-              />
-              {diary.images.length > 1 && (
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                  +{diary.images.length - 1}
-                </div>
-              )}
             </div>
           )}
+        </div>
 
-          <div className="p-4 md:p-6">
-            {/* 日期 */}
-            <div className="text-sm text-indigo-600 font-semibold mb-2">
-              {DateUtils.formatReadableDate(diary.date)}
+        {/* 翻页书效果 */}
+        <div className="relative max-w-5xl mx-auto">
+          <div className="book-container perspective-1000">
+            <div className={`book ${isFlipping ? 'flipping' : ''}`}>
+              {pageDiaries.map((diary, index) => (
+                <div
+                  key={diary.id}
+                  className={`page ${index === 0 ? 'page-left' : 'page-right'} bg-white rounded-lg shadow-2xl p-4 md:p-6 lg:p-8`}
+                >
+                  <div className="h-full flex flex-col">
+                    {/* 日记日期 */}
+                    <div className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
+                      {DateUtils.formatReadableDate(diary.date)}
+                    </div>
+
+                    {/* 日记标题 */}
+                    {diary.title && (
+                      <h3 className="text-base md:text-xl lg:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
+                        {diary.title}
+                      </h3>
+                    )}
+
+                    {/* 日记内容 */}
+                    <div className="flex-1 overflow-y-auto mb-3 md:mb-4">
+                      <div
+                        className="text-sm md:text-base text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: diary.content }}
+                      />
+                    </div>
+
+                    {/* 日记图片 */}
+                    {diary.images && diary.images.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mb-3 md:mb-4">
+                        {diary.images.slice(0, 4).map((image, imgIndex) => (
+                          <img
+                            key={imgIndex}
+                            src={image}
+                            alt={`日记图片 ${imgIndex + 1}`}
+                            className="w-full h-24 md:h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => window.open(image, '_blank')}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 页码 */}
+                    <div className="text-center text-xs md:text-sm text-gray-400">
+                      第 {currentPage * 2 + index + 1} 页
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 翻页按钮 */}
+          <div className="flex justify-between items-center mt-6 md:mt-8">
+            <button
+              onClick={() => handlePageTurn('prev')}
+              disabled={currentPage === 0 || isFlipping}
+              className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-white rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm md:text-base"
+            >
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="hidden sm:inline">上一页</span>
+            </button>
+
+            <div className="text-sm md:text-base text-gray-600">
+              {currentPage + 1} / {totalPages}
             </div>
 
-            {/* 标题 */}
-            {diary.title && (
-              <h3 className="text-base md:text-lg font-bold text-gray-800 mb-2">
-                {diary.title}
-              </h3>
-            )}
-
-            {/* 内容 */}
-            <div
-              className="text-sm text-gray-700 line-clamp-4 prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: diary.content }}
-            />
+            <button
+              onClick={() => handlePageTurn('next')}
+              disabled={currentPage >= totalPages - 1 || isFlipping}
+              className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-white rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm md:text-base"
+            >
+              <span className="hidden sm:inline">下一页</span>
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
-      ))}
+      </div>
     </div>
   );
 };
