@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import Layout from './components/Layout';
+import LayoutGithub from './components/LayoutGithub';
 import DiaryDisplay from './pages/DiaryDisplay';
 
 const App = () => {
@@ -11,7 +11,7 @@ const App = () => {
       <UserProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL || '/'}>
           <Routes>
-            <Route path="/" element={<Layout />}>
+            <Route path="/" element={<LayoutGithub />}>
               <Route index element={<DiaryDisplay />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
