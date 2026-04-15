@@ -39,8 +39,9 @@ const HomeGithub = () => {
   const loadDiaries = async (userId) => {
     try {
       setLoading(true);
-      const data = await api.getDiaries(userId);
-      const sortedDiaries = data.sort((a, b) => {
+      const data = await api.getDiaries();
+      const userDiaries = data.filter(diary => diary.userId === userId);
+      const sortedDiaries = userDiaries.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);
       });
       setDiaries(sortedDiaries);
