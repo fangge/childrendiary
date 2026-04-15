@@ -81,6 +81,12 @@ const HomeGithub = () => {
     return diaries.filter(diary => diary.date.startsWith(selectedMonth));
   };
 
+  const getAvailableMonths = () => {
+    const months = [...new Set(diaries.map(d => d.date.substring(0, 7)))];
+    months.sort().reverse();
+    return months;
+  };
+
   const getTotalPages = () => {
     const filtered = getFilteredDiaries();
     return Math.ceil(filtered.length / 2);
@@ -159,12 +165,18 @@ const HomeGithub = () => {
             )}
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-500 mb-2">筛选月份:</label>
-              <input
-                type="month"
+              <select
                 value={selectedMonth}
                 onChange={(e) => { setSelectedMonth(e.target.value); setCurrentPage(0); }}
                 className="w-full px-4 py-2 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand bg-white text-sm"
-              />
+              >
+                <option value="">全部</option>
+                {getAvailableMonths().map(month => (
+                  <option key={month} value={month}>
+                    {month.replace('-', '年') + '月'}
+                  </option>
+                ))}
+              </select>
               {selectedMonth && (
                 <button
                   onClick={() => { setSelectedMonth(''); setCurrentPage(0); }}
@@ -247,12 +259,18 @@ const HomeGithub = () => {
             )}
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-pill border border-[rgba(0,0,0,0.05)] shadow-card">
               <label className="text-sm font-medium text-gray-500">筛选月份:</label>
-              <input
-                type="month"
+              <select
                 value={selectedMonth}
                 onChange={(e) => { setSelectedMonth(e.target.value); setCurrentPage(0); }}
                 className="px-3 py-1 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand bg-white text-sm"
-              />
+              >
+                <option value="">全部</option>
+                {getAvailableMonths().map(month => (
+                  <option key={month} value={month}>
+                    {month.replace('-', '年') + '月'}
+                  </option>
+                ))}
+              </select>
               {selectedMonth && (
                 <button
                   onClick={() => { setSelectedMonth(''); setCurrentPage(0); }}
