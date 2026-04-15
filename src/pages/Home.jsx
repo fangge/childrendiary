@@ -55,6 +55,17 @@ const Home = () => {
     return diaries.slice(startIndex, startIndex + 2);
   };
 
+  const getAgeAtDate = (birthday, date) => {
+    const birth = new Date(birthday);
+    const target = new Date(date);
+    let age = target.getFullYear() - birth.getFullYear();
+    const monthDiff = target.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && target.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
+  };
+
   if (!currentUser) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center hero-gradient">
@@ -134,11 +145,16 @@ const Home = () => {
                   className={`page ${index === 0 ? 'page-left' : 'page-right'} bg-white rounded-card border border-[rgba(0,0,0,0.05)] shadow-card p-6 md:p-8`}
                 >
                   <div className="h-full flex flex-col">
-                    {/* 日记日期 - Mintlify 风格标签 */}
-                    <div className="mb-4">
+                    {/* 日记日期和年龄 */}
+                    <div className="mb-4 flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
                         {DateUtils.formatReadableDate(diary.date)}
                       </span>
+                      {currentUser.birthday && getAgeAtDate(currentUser.birthday, diary.date) !== null && (
+                        <span className="text-xs font-medium text-info-blue bg-blue-50 px-2.5 py-1 rounded-pill">
+                          {getAgeAtDate(currentUser.birthday, diary.date)}岁
+                        </span>
+                      )}
                     </div>
 
                     {/* 日记标题 */}

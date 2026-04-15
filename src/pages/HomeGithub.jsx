@@ -10,6 +10,7 @@ const HomeGithub = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -57,8 +58,9 @@ const HomeGithub = () => {
     if (isFlipping) return;
     
     setIsFlipping(true);
+    const totalPages = getTotalPages();
     const newPage = direction === 'next' 
-      ? Math.min(currentPage + 1, Math.ceil(diaries.length / 2) - 1)
+      ? Math.min(currentPage + 1, totalPages - 1)
       : Math.max(currentPage - 1, 0);
     
     setCurrentPage(newPage);
@@ -66,8 +68,33 @@ const HomeGithub = () => {
   };
 
   const getCurrentPageDiaries = () => {
+    let filtered = diaries;
+    if (selectedMonth) {
+      filtered = filtered.filter(diary => diary.date.startsWith(selectedMonth));
+    }
     const startIndex = currentPage * 2;
-    return diaries.slice(startIndex, startIndex + 2);
+    return filtered.slice(startIndex, startIndex + 2);
+  };
+
+  const getFilteredDiaries = () => {
+    if (!selectedMonth) return diaries;
+    return diaries.filter(diary => diary.date.startsWith(selectedMonth));
+  };
+
+  const getTotalPages = () => {
+    const filtered = getFilteredDiaries();
+    return Math.ceil(filtered.length / 2);
+  };
+
+  const getAgeAtDate = (birthday, date) => {
+    const birth = new Date(birthday);
+    const target = new Date(date);
+    let age = target.getFullYear() - birth.getFullYear();
+    const monthDiff = target.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && target.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
   };
 
   const getCurrentUser = () => {
@@ -94,6 +121,60 @@ const HomeGithub = () => {
           </svg>
           <h2 className="text-2xl font-semibold text-near-black tracking-tight mb-3">暂无用户数据</h2>
           <p className="text-gray-500">请在本地版本中添加用户和日记</p>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredDiaries = getFilteredDiaries();
+
+  if (filteredDiaries.length === 0 && diaries.length > 0) {
+    const currentUser = getCurrentUser();
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center hero-gradient p-4">
+        <div className="text-center p-10 bg-white rounded-featured border border-[rgba(0,0,0,0.05)] shadow-card max-w-md">
+          <div className="mb-6">
+            <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-near-black tracking-tight mb-3">该月份没有日记</h2>
+          <p className="text-gray-500 mb-6">{currentUser?.name} 在所选月份没有记录日记</p>
+          <div className="flex flex-col items-center gap-4">
+            {users.length > 1 && (
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-500 mb-2">切换用户:</label>
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="w-full px-4 py-2 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand bg-white text-sm"
+                >
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-500 mb-2">筛选月份:</label>
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => { setSelectedMonth(e.target.value); setCurrentPage(0); }}
+                className="w-full px-4 py-2 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand bg-white text-sm"
+              />
+              {selectedMonth && (
+                <button
+                  onClick={() => { setSelectedMonth(''); setCurrentPage(0); }}
+                  className="mt-2 text-sm text-brand hover:text-brand-deep font-medium"
+                >
+                  清除月份筛选
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -133,7 +214,7 @@ const HomeGithub = () => {
   }
 
   const pageDiaries = getCurrentPageDiaries();
-  const totalPages = Math.ceil(diaries.length / 2);
+  const totalPages = getTotalPages();
   const currentUser = getCurrentUser();
 
   return (
@@ -144,11 +225,11 @@ const HomeGithub = () => {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-near-black tracking-tight mb-2" style={{ letterSpacing: '-0.8px' }}>
             {currentUser?.name} 的成长日记
           </h1>
-          <p className="text-sm md:text-base text-gray-500">共 {diaries.length} 篇日记</p>
+          <p className="text-sm md:text-base text-gray-500">共 {filteredDiaries.length} 篇日记</p>
           
-          {/* 用户选择器 */}
-          {users.length > 1 && (
-            <div className="mt-4 flex justify-center">
+          {/* 用户选择器和月份筛选 */}
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            {users.length > 1 && (
               <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-pill border border-[rgba(0,0,0,0.05)] shadow-card">
                 <label className="text-sm font-medium text-gray-500">切换用户:</label>
                 <select
@@ -163,8 +244,25 @@ const HomeGithub = () => {
                   ))}
                 </select>
               </div>
+            )}
+            <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-pill border border-[rgba(0,0,0,0.05)] shadow-card">
+              <label className="text-sm font-medium text-gray-500">筛选月份:</label>
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => { setSelectedMonth(e.target.value); setCurrentPage(0); }}
+                className="px-3 py-1 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand bg-white text-sm"
+              />
+              {selectedMonth && (
+                <button
+                  onClick={() => { setSelectedMonth(''); setCurrentPage(0); }}
+                  className="text-sm text-brand hover:text-brand-deep font-medium"
+                >
+                  清除
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* 翻页书效果 */}
@@ -177,11 +275,16 @@ const HomeGithub = () => {
                   className={`page ${index === 0 ? 'page-left' : 'page-right'} bg-white rounded-card border border-[rgba(0,0,0,0.05)] shadow-card p-4 md:p-6 lg:p-8`}
                 >
                   <div className="h-full flex flex-col">
-                    {/* 日记日期 */}
-                    <div className="mb-3 md:mb-4">
+                    {/* 日记日期和年龄 */}
+                    <div className="mb-3 md:mb-4 flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
                         {DateUtils.formatReadableDate(diary.date)}
                       </span>
+                      {currentUser?.birthday && getAgeAtDate(currentUser.birthday, diary.date) !== null && (
+                        <span className="text-xs font-medium text-info-blue bg-blue-50 px-2.5 py-1 rounded-pill">
+                          {getAgeAtDate(currentUser.birthday, diary.date)}岁
+                        </span>
+                      )}
                     </div>
 
                     {/* 日记标题 */}

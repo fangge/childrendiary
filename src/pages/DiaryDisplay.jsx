@@ -50,6 +50,17 @@ const DiaryDisplay = () => {
     };
   };
 
+  const getAgeAtDate = (birthday, date) => {
+    const birth = new Date(birthday);
+    const target = new Date(date);
+    let age = target.getFullYear() - birth.getFullYear();
+    const monthDiff = target.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && target.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
+  };
+
   if (!currentUser) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center hero-gradient">
@@ -173,9 +184,9 @@ const DiaryDisplay = () => {
             <p className="text-gray-500">选择其他月份或创建新日记</p>
           </div>
         ) : viewMode === 'timeline' ? (
-          <TimelineView diaries={monthDiaries} />
+          <TimelineView diaries={monthDiaries} birthday={currentUser.birthday} getAgeAtDate={getAgeAtDate} />
         ) : (
-          <GridView diaries={monthDiaries} />
+          <GridView diaries={monthDiaries} birthday={currentUser.birthday} getAgeAtDate={getAgeAtDate} />
         )}
       </div>
     </div>
@@ -183,7 +194,7 @@ const DiaryDisplay = () => {
 };
 
 // 时间线视图组件 - Mintlify 风格
-const TimelineView = ({ diaries }) => {
+const TimelineView = ({ diaries, birthday, getAgeAtDate }) => {
   return (
     <div className="relative">
       {/* 时间线 - 品牌绿色 */}
@@ -198,11 +209,16 @@ const TimelineView = ({ diaries }) => {
             {/* 日记卡片 */}
             <div className="bg-white rounded-card border border-[rgba(0,0,0,0.05)] shadow-card hover:border-[rgba(0,0,0,0.08)] transition-all duration-200 overflow-hidden">
               <div className="p-6">
-                {/* 日期 */}
-                <div className="mb-2">
+                {/* 日期和年龄 */}
+                <div className="mb-2 flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
                     {DateUtils.formatReadableDate(diary.date)}
                   </span>
+                  {birthday && getAgeAtDate(birthday, diary.date) !== null && (
+                    <span className="text-xs font-medium text-info-blue bg-blue-50 px-2.5 py-1 rounded-pill">
+                      {getAgeAtDate(birthday, diary.date)}岁
+                    </span>
+                  )}
                 </div>
 
                 {/* 标题 */}
@@ -242,7 +258,7 @@ const TimelineView = ({ diaries }) => {
 };
 
 // 网格视图组件
-const GridView = ({ diaries }) => {
+const GridView = ({ diaries, birthday, getAgeAtDate }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {diaries.map((diary) => (
@@ -267,11 +283,16 @@ const GridView = ({ diaries }) => {
           )}
 
           <div className="p-6">
-            {/* 日期标签 */}
-            <div className="mb-2">
+            {/* 日期标签和年龄 */}
+            <div className="mb-2 flex items-center gap-2 flex-wrap">
               <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
                 {DateUtils.formatReadableDate(diary.date)}
               </span>
+              {birthday && getAgeAtDate(birthday, diary.date) !== null && (
+                <span className="text-xs font-medium text-info-blue bg-blue-50 px-2.5 py-1 rounded-pill">
+                  {getAgeAtDate(birthday, diary.date)}岁
+                </span>
+              )}
             </div>
 
             {/* 标题 */}
