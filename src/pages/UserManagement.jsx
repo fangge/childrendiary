@@ -199,7 +199,7 @@ const UserManagement = () => {
                       />
                     ) : (
                       <div className="w-24 h-24 rounded-full bg-brand-light flex items-center justify-center text-brand text-3xl font-semibold">
-                        {user.name.charAt(0)}
+                        {user.name}
                       </div>
                     )}
                   </div>

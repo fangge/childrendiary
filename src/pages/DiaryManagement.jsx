@@ -452,7 +452,7 @@ const DiaryManagement = () => {
                   <QuillEditor
                     key={editingDiary ? `edit-${editingDiary.id}` : 'new'}
                     value={formData.content}
-                    onChange={(content) => setFormData({ ...formData, content })}
+                    onChange={(content) => setFormData(prev => ({ ...prev, content }))}
                     placeholder="记录今天的故事..."
                     className={errors.content ? 'border-error-red' : 'border-[rgba(0,0,0,0.08)]'}
                   />

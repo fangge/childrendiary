@@ -7,6 +7,10 @@ const QuillEditor = ({ value, onChange, placeholder = '请输入内容...', clas
   const quillRef = useRef(null);
   const isUpdatingRef = useRef(false);
   const isInitializedRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+
+  // 始终保持 onChange 引用最新
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     if (!containerRef.current || isInitializedRef.current) return;
@@ -49,8 +53,8 @@ const QuillEditor = ({ value, onChange, placeholder = '请输入内容...', clas
       // 如果内容为空，返回空字符串而不是 <p><br></p>
       const content = html === '<p><br></p>' ? '' : html;
       
-      if (onChange) {
-        onChange(content);
+      if (onChangeRef.current) {
+        onChangeRef.current(content);
       }
     });
 

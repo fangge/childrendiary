@@ -1,10 +1,10 @@
-# 豆豆日记 (DouDou Diary)
+# 快乐日记 (DouDou Diary)
 
 一个现代化的日记记录应用，使用React和Rspack构建，帮助用户记录生活中的每一个精彩瞬间。
 
 ## 在线访问
 
-访问我们的在线演示：[豆豆日记](https://fangge.github.io/childrendiary/)
+访问我们的在线演示：[快乐日记](https://fangge.github.io/childrendiary/)
 
 > **注意**：GitHub Pages版本是展示版，仅提供日记浏览功能，不包含用户管理和日记管理功能。
 

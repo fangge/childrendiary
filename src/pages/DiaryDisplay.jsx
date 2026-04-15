@@ -23,8 +23,9 @@ const DiaryDisplay = () => {
   const loadDiaries = async () => {
     try {
       setLoading(true);
-      const data = await api.getDiaries(currentUser.id);
-      setDiaries(data.sort((a, b) => new Date(b.date) - new Date(a.date)));
+      const data = await api.getDiaries();
+      const userDiaries = data.filter(diary => diary.userId === currentUser.id);
+      setDiaries(userDiaries.sort((a, b) => new Date(b.date) - new Date(a.date)));
     } catch (error) {
       console.error('加载日记失败:', error);
     } finally {

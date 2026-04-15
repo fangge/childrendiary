@@ -25,8 +25,9 @@ const Home = () => {
 
     try {
       setLoading(true);
-      const data = await api.getDiaries(currentUser.id);
-      const sortedDiaries = data.sort((a, b) => {
+      const data = await api.getDiaries();
+      const userDiaries = data.filter(diary => diary.userId === currentUser.id);
+      const sortedDiaries = userDiaries.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);
       });
       setDiaries(sortedDiaries);
