@@ -9,7 +9,7 @@ const DiaryDisplay = () => {
   const { currentUser } = useCurrentUser();
   const [diaries, setDiaries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('timeline'); // timeline, grid, calendar
+  const [viewMode, setViewMode] = useState('timeline');
   const [selectedMonth, setSelectedMonth] = useState(DateUtils.getCurrentDate().substring(0, 7));
 
   useEffect(() => {
@@ -51,16 +51,16 @@ const DiaryDisplay = () => {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
-          <svg className="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="min-h-[60vh] flex items-center justify-center hero-gradient">
+        <div className="text-center p-10 bg-white rounded-featured border border-[rgba(0,0,0,0.05)] shadow-card max-w-md">
+          <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">请先选择用户</h2>
-          <p className="text-gray-600 mb-6">需要选择一个用户才能查看日记</p>
+          <h2 className="text-2xl font-semibold text-near-black tracking-tight mb-3">请先选择用户</h2>
+          <p className="text-gray-500 mb-6">需要选择一个用户才能查看日记</p>
           <button
             onClick={() => navigate('/users')}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+            className="btn-primary"
           >
             前往用户管理
           </button>
@@ -71,10 +71,10 @@ const DiaryDisplay = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载中...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm text-gray-400">加载中...</p>
         </div>
       </div>
     );
@@ -84,21 +84,21 @@ const DiaryDisplay = () => {
   const stats = getMonthlyStats();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <div className="py-8 px-2 md:px-4">
       <div className="max-w-7xl mx-auto">
         {/* 头部 */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">日记展示</h1>
-            <p className="text-gray-600">{currentUser.name} 的成长记录</p>
+            <h1 className="text-3xl font-semibold text-near-black tracking-tight mb-2" style={{ letterSpacing: '-0.8px' }}>日记展示</h1>
+            <p className="text-gray-500">{currentUser.name} 的成长记录</p>
           </div>
           
           <div className="flex gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-lg shadow-md transition-all duration-200"
+              className="btn-secondary flex items-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
               打印
@@ -107,15 +107,15 @@ const DiaryDisplay = () => {
         </div>
 
         {/* 视图切换和月份选择 */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div className="card-mint mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            {/* 视图模式 */}
+            {/* 视图模式 - 药丸按钮 */}
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('timeline')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                className={`px-4 py-2 rounded-pill text-sm font-medium transition-all duration-200 ${
                   viewMode === 'timeline'
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-near-black text-white shadow-button'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -123,9 +123,9 @@ const DiaryDisplay = () => {
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                className={`px-4 py-2 rounded-pill text-sm font-medium transition-all duration-200 ${
                   viewMode === 'grid'
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-near-black text-white shadow-button'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -135,40 +135,40 @@ const DiaryDisplay = () => {
 
             {/* 月份选择 */}
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">选择月份:</label>
+              <label className="text-sm font-medium text-gray-500">选择月份:</label>
               <input
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="px-4 py-2 border border-[rgba(0,0,0,0.08)] rounded-pill focus:ring-brand focus:border-brand text-sm"
               />
             </div>
           </div>
 
           {/* 统计信息 */}
-          <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-3 gap-4">
+          <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.05)] grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-indigo-600">{stats.total}</div>
-              <div className="text-sm text-gray-600">篇日记</div>
+              <div className="text-2xl font-semibold text-brand">{stats.total}</div>
+              <div className="text-sm text-gray-400">篇日记</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.withImages}</div>
-              <div className="text-sm text-gray-600">含图片</div>
+              <div className="text-2xl font-semibold text-brand-deep">{stats.withImages}</div>
+              <div className="text-sm text-gray-400">含图片</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.totalWords}</div>
-              <div className="text-sm text-gray-600">总字数</div>
+              <div className="text-2xl font-semibold text-info-blue">{stats.totalWords}</div>
+              <div className="text-sm text-gray-400">总字数</div>
             </div>
           </div>
         </div>
 
         {/* 日记内容 */}
         {monthDiaries.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-xl">
-            <svg className="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="text-center py-20 bg-white rounded-featured border border-[rgba(0,0,0,0.05)]">
+            <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">这个月还没有日记</h3>
+            <h3 className="text-xl font-semibold text-near-black mb-2">这个月还没有日记</h3>
             <p className="text-gray-500">选择其他月份或创建新日记</p>
           </div>
         ) : viewMode === 'timeline' ? (
@@ -181,30 +181,32 @@ const DiaryDisplay = () => {
   );
 };
 
-// 时间线视图组件
+// 时间线视图组件 - Mintlify 风格
 const TimelineView = ({ diaries }) => {
   return (
     <div className="relative">
-      {/* 时间线 */}
-      <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-indigo-200"></div>
+      {/* 时间线 - 品牌绿色 */}
+      <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-brand/20"></div>
 
       <div className="space-y-8">
         {diaries.map((diary, index) => (
           <div key={diary.id} className="relative pl-20">
-            {/* 时间点 */}
-            <div className="absolute left-5 top-0 w-6 h-6 bg-indigo-600 rounded-full border-4 border-white shadow-md"></div>
+            {/* 时间点 - 品牌绿色圆点 */}
+            <div className="absolute left-5 top-0 w-6 h-6 bg-brand rounded-full border-4 border-white shadow-button"></div>
 
             {/* 日记卡片 */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden">
+            <div className="bg-white rounded-card border border-[rgba(0,0,0,0.05)] shadow-card hover:border-[rgba(0,0,0,0.08)] transition-all duration-200 overflow-hidden">
               <div className="p-6">
                 {/* 日期 */}
-                <div className="text-sm text-indigo-600 font-semibold mb-2">
-                  {DateUtils.formatReadableDate(diary.date)}
+                <div className="mb-2">
+                  <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
+                    {DateUtils.formatReadableDate(diary.date)}
+                  </span>
                 </div>
 
                 {/* 标题 */}
                 {diary.title && (
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">
+                  <h3 className="text-xl font-semibold text-near-black tracking-tight mb-3" style={{ letterSpacing: '-0.2px' }}>
                     {diary.title}
                   </h3>
                 )}
@@ -223,7 +225,7 @@ const TimelineView = ({ diaries }) => {
                         key={imgIndex}
                         src={image}
                         alt={`日记图片 ${imgIndex + 1}`}
-                        className="w-full h-40 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-full h-40 object-cover rounded-card border border-[rgba(0,0,0,0.05)] cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => window.open(image, '_blank')}
                       />
                     ))}
@@ -245,18 +247,18 @@ const GridView = ({ diaries }) => {
       {diaries.map((diary) => (
         <div
           key={diary.id}
-          className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden"
+          className="bg-white rounded-card border border-[rgba(0,0,0,0.05)] shadow-card hover:border-[rgba(0,0,0,0.08)] transition-all duration-200 overflow-hidden"
         >
           {/* 图片 */}
           {diary.images && diary.images.length > 0 && (
-            <div className="relative h-48 bg-gray-100">
+            <div className="relative h-48 bg-gray-50">
               <img
                 src={diary.images[0]}
                 alt="日记图片"
                 className="w-full h-full object-cover"
               />
               {diary.images.length > 1 && (
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-near-black/60 text-white text-xs px-2 py-1 rounded-pill">
                   +{diary.images.length - 1}
                 </div>
               )}
@@ -264,21 +266,23 @@ const GridView = ({ diaries }) => {
           )}
 
           <div className="p-6">
-            {/* 日期 */}
-            <div className="text-sm text-indigo-600 font-semibold mb-2">
-              {DateUtils.formatReadableDate(diary.date)}
+            {/* 日期标签 */}
+            <div className="mb-2">
+              <span className="text-xs font-medium text-brand bg-brand-light px-2.5 py-1 rounded-pill">
+                {DateUtils.formatReadableDate(diary.date)}
+              </span>
             </div>
 
             {/* 标题 */}
             {diary.title && (
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-near-black tracking-tight mb-2" style={{ letterSpacing: '-0.2px' }}>
                 {diary.title}
               </h3>
             )}
 
             {/* 内容 */}
             <div
-              className="text-gray-700 text-sm line-clamp-4 prose prose-sm max-w-none"
+              className="text-gray-500 text-sm line-clamp-4 prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{ __html: diary.content }}
             />
           </div>

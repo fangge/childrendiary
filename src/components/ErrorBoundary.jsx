@@ -25,11 +25,11 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-          <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+        <div className="min-h-screen flex items-center justify-center bg-white px-4">
+          <div className="max-w-md w-full bg-white rounded-featured border border-[rgba(0,0,0,0.05)] shadow-card p-8">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-50 rounded-full mb-4">
               <svg
-                className="w-6 h-6 text-red-600 dark:text-red-400"
+                className="w-6 h-6 text-error-red"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -43,21 +43,21 @@ class ErrorBoundary extends React.Component {
               </svg>
             </div>
             
-            <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-semibold text-center text-near-black mb-2">
               出错了
             </h2>
             
-            <p className="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-center text-gray-500 mb-6">
               应用遇到了一个错误，请尝试刷新页面或联系管理员。
             </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded text-xs overflow-auto max-h-40">
-                <p className="font-semibold text-red-600 dark:text-red-400 mb-2">
+              <div className="mb-4 p-4 bg-gray-50 rounded-card text-xs overflow-auto max-h-40 border border-[rgba(0,0,0,0.05)]">
+                <p className="font-semibold text-error-red mb-2">
                   {this.state.error.toString()}
                 </p>
                 {this.state.errorInfo && (
-                  <pre className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  <pre className="text-gray-700 whitespace-pre-wrap">
                     {this.state.errorInfo.componentStack}
                   </pre>
                 )}
@@ -67,13 +67,13 @@ class ErrorBoundary extends React.Component {
             <div className="flex gap-3">
               <button
                 onClick={this.handleReset}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                className="flex-1 btn-primary py-2.5"
               >
                 重试
               </button>
               <button
                 onClick={() => window.location.href = '/'}
-                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+                className="flex-1 btn-secondary py-2.5"
               >
                 返回首页
               </button>
