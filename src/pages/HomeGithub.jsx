@@ -13,6 +13,8 @@ const HomeGithub = () => {
   const [diaries, setDiaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [fullscreenDiary, setFullscreenDiary] = useState(null);
+  const [fontSize, setFontSize] = useState(100);
 
   useEffect(() => {
     loadUsers();
@@ -294,6 +296,15 @@ const HomeGithub = () => {
                             {getAgeAtDate(currentUser.birthday, diary.date)}岁
                           </span>
                         )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setFullscreenDiary(diary); }}
+                          className="text-[13px] font-medium text-white bg-black/40 backdrop-blur-sm px-2 py-1 rounded-pill hover:bg-black/60 transition-colors flex items-center gap-1"
+                          title="全屏查看"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                          </svg>
+                        </button>
                       </div>
 
                       {/* 标题叠加在图片上 */}
@@ -318,6 +329,15 @@ const HomeGithub = () => {
                             {getAgeAtDate(currentUser.birthday, diary.date)}岁
                           </span>
                         )}
+                        <button
+                          onClick={() => setFullscreenDiary(diary)}
+                          className="text-[13px] font-medium text-gray-500 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-pill hover:bg-gray-100 transition-colors flex items-center gap-1"
+                          title="全屏查看"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                          </svg>
+                        </button>
                       </div>
                       {/* 标题 */}
                       {diary.title && (
@@ -367,6 +387,98 @@ const HomeGithub = () => {
             左右滑动查看更多 · 共 {filteredDiaries.length} 篇
           </p>
         </div>
+      </div>
+
+      {/* 全屏查看弹窗 */}
+      {fullscreenDiary && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+          {/* 顶部工具栏 */}
+          <div className="shrink-0 px-4 py-3 border-b border-[rgba(0,0,0,0.05)] flex items-center justify-between bg-white/95 backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+              {/* 日期和年龄 */}
+              <span className="text-sm font-medium text-gray-600">
+                {DateUtils.formatReadableDate(fullscreenDiary.date)}
+              </span>
+              {currentUser?.birthday && getAgeAtDate(currentUser.birthday, fullscreenDiary.date) !== null && (
+                <span className="text-[13px] font-medium text-[#c37d0d] bg-[#fef3e0] px-2.5 py-1 rounded-pill">
+                  {getAgeAtDate(currentUser.birthday, fullscreenDiary.date)}岁
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* 字体缩小按钮 */}
+              <button
+                onClick={() => setFontSize(Math.max(60, fontSize - 10))}
+                disabled={fontSize <= 60}
+                className="w-8 h-8 rounded-full border border-[rgba(0,0,0,0.08)] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="缩小字体"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+              {/* 字体大小显示 */}
+              <span className="text-xs text-gray-400 min-w-[36px] text-center">{fontSize}%</span>
+              {/* 字体放大按钮 */}
+              <button
+                onClick={() => setFontSize(Math.min(200, fontSize + 10))}
+                disabled={fontSize >= 200}
+                className="w-8 h-8 rounded-full border border-[rgba(0,0,0,0.08)] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="放大字体"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+              {/* 分隔线 */}
+              <div className="w-px h-5 bg-gray-200 mx-1" />
+              {/* 关闭按钮 */}
+              <button
+                onClick={() => { setFullscreenDiary(null); setFontSize(100); }}
+                className="w-8 h-8 rounded-full border border-[rgba(0,0,0,0.08)] flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-near-black transition-colors"
+                title="关闭"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* 全屏内容区域 */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-2xl mx-auto p-6 md:p-10" style={{ fontSize: `${fontSize}%` }}>
+              {/* 图片展示 */}
+              {fullscreenDiary.images && fullscreenDiary.images.length > 0 && (
+                <div className="mb-6 space-y-3">
+                  {fullscreenDiary.images.map((image, imgIndex) => (
+                    <img
+                      key={imgIndex}
+                      src={image}
+                      alt={`日记图片 ${imgIndex + 1}`}
+                      className="w-full max-h-[400px] object-cover rounded-2xl border border-[rgba(0,0,0,0.05)] cursor-pointer"
+                      onClick={() => window.open(image, '_blank')}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* 标题 */}
+              {fullscreenDiary.title && (
+                <h2 className="text-2xl md:text-3xl font-semibold text-near-black tracking-tight mb-5" style={{ letterSpacing: '-0.3px' }}>
+                  {fullscreenDiary.title}
+                </h2>
+              )}
+
+              {/* 内容 */}
+              <div
+                className="text-gray-700 leading-relaxed prose prose-base max-w-none [&_p]:mb-4 [&_p]:leading-[1.7]"
+                dangerouslySetInnerHTML={{ __html: fullscreenDiary.content }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
