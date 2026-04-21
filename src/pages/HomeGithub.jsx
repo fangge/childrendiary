@@ -479,7 +479,6 @@ const HomeGithub = () => {
           </div>
         </div>
       )}
-      </div>
     </div>
   );
 };
