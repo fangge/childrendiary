@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
 /* 全局样式变量 - Mintlify 设计系统 */
 :root {
-  --color-brand: #18E299;
+  --color-brand: #18e299;
   --color-brand-light: #d4fae8;
   --color-brand-deep: #0fa76e;
   --color-near-black: #0d0d0d;
@@ -15,10 +15,10 @@
   --color-gray-100: #f5f5f5;
   --color-error: #d45656;
   --color-warn: #c37d0d;
-  --border-subtle: rgba(0,0,0,0.05);
-  --border-medium: rgba(0,0,0,0.08);
-  --shadow-card: rgba(0,0,0,0.03) 0px 2px 4px;
-  --shadow-button: rgba(0,0,0,0.06) 0px 1px 2px;
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-medium: rgba(0, 0, 0, 0.08);
+  --shadow-card: rgba(0, 0, 0, 0.03) 0px 2px 4px;
+  --shadow-button: rgba(0, 0, 0, 0.06) 0px 1px 2px;
   --transition-speed: 0.2s;
 }
 
@@ -30,7 +30,19 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', 'Inter Fallback', system-ui, -apple-system, sans-serif;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Microsoft Yahei,
+    Segoe UI,
+    Helvetica Neue,
+    Helvetica,
+    Tahoma,
+    Arial,
+    Hiragino Sans GB,
+    Heiti SC,
+    WenQuanYi Micro Hei,
+    sans-serif;
   color: var(--color-gray-700);
   background: var(--color-white);
   -webkit-font-smoothing: antialiased;
@@ -86,8 +98,9 @@ button:disabled {
 input,
 textarea,
 select {
-  transition: border-color var(--transition-speed) ease,
-              box-shadow var(--transition-speed) ease;
+  transition:
+    border-color var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
 }
 
 input:focus,
@@ -101,25 +114,25 @@ select:focus {
 /* 卡片样式 - Mintlify 风格 */
 .card-mint {
   background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: rgba(0,0,0,0.03) 0px 2px 4px;
+  box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 4px;
   transition: border-color var(--transition-speed) ease;
 }
 
 .card-mint:hover {
-  border-color: rgba(0,0,0,0.08);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 /* 卡片阴影效果 */
 .card-shadow {
-  box-shadow: rgba(0,0,0,0.03) 0px 2px 4px;
+  box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 4px;
   transition: box-shadow var(--transition-speed) ease;
 }
 
 .card-shadow:hover {
-  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
 }
 
 /* 加载动画 */
@@ -185,7 +198,7 @@ select:focus {
     left: 0;
     right: 0;
     background: white;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     padding: 0.5rem;
     z-index: 50;
   }
@@ -258,7 +271,7 @@ select:focus {
 
 /* Mintlify 风格：大气渐变 Hero 背景 */
 .hero-gradient {
-  background: linear-gradient(180deg, #d4fae8 0%, rgba(24,226,153,0.08) 40%, #ffffff 100%);
+  background: linear-gradient(180deg, #d4fae8 0%, rgba(24, 226, 153, 0.08) 40%, #ffffff 100%);
 }
 
 /* Mintlify 风格：品牌绿色徽章 */
@@ -282,7 +295,7 @@ select:focus {
   font-size: 15px;
   font-weight: 500;
   border: none;
-  box-shadow: rgba(0,0,0,0.06) 0px 1px 2px;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 2px;
   transition: opacity 0.2s ease;
 }
 
@@ -298,7 +311,7 @@ select:focus {
   border-radius: 9999px;
   font-size: 15px;
   font-weight: 500;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   transition: opacity 0.2s ease;
 }
 
@@ -308,7 +321,7 @@ select:focus {
 
 /* Mintlify 风格：品牌强调按钮 */
 .btn-brand {
-  background: #18E299;
+  background: #18e299;
   color: #0d0d0d;
   padding: 8px 24px;
   border-radius: 9999px;
@@ -324,16 +337,16 @@ select:focus {
 
 /* Quill 编辑器样式覆盖 */
 .ql-toolbar.ql-snow {
-  border: 1px solid rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: 16px 16px 0 0 !important;
   background: #fafafa;
 }
 
 .ql-container.ql-snow {
-  border: 1px solid rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-top: none !important;
   border-radius: 0 0 16px 16px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: "Inter", sans-serif !important;
   font-size: 16px !important;
 }
 

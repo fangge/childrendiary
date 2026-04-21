@@ -18,7 +18,7 @@ function LayoutGithub() {
       {/* Mintlify 风格页脚 */}
       <footer className="border-t border-[rgba(0,0,0,0.05)] bg-white">
         <div className="max-w-[1200px] mx-auto px-6 py-6 text-center">
-          <p className="text-sm text-gray-400">© 2025 快乐日记 - 记录美好生活的每一天</p>
+          <p className="text-sm text-gray-400">© 2026 快乐日记 - 记录美好生活的每一天</p>
         </div>
       </footer>
     </div>

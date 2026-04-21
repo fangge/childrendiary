@@ -45,6 +45,7 @@
     "react-dom": "^19.2.3",
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.10.1",
+    "swiper": "^12.1.3",
     "turn.js": "^1.0.5"
   }
 }
