@@ -41,6 +41,9 @@ importers:
       react-router-dom:
         specifier: ^7.10.1
         version: 7.14.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      swiper:
+        specifier: ^14.0.7
+        version: 14.0.7
       turn.js:
         specifier: ^1.0.5
         version: 1.0.5
@@ -2027,6 +2030,10 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
+
+  swiper@14.0.7:
+    resolution: {integrity: sha512-PDMY+8hNQBh4kAYdfKIF1GNS7u3hg4xl3NVKBey0rENnpUpTsiE/aCcbgpmm1PIf4RMI7loO3XhW9BdxLzQw0A==}
+    engines: {node: '>= 4.7.0'}
 
   tailwindcss@4.2.2:
     resolution: {integrity: sha512-KWBIxs1Xb6NoLdMVqhbhgwZf2PGBpPEiwOqgI4pFIYbNTfBXiKYyWoTsXgBQ9WFg/OlhnvHaY+AEpW7wSmFo2Q==}
@@ -4237,6 +4244,8 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+
+  swiper@14.0.7: {}
 
   tailwindcss@4.2.2: {}
 

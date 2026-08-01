@@ -1,25 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
-/* 全局样式变量 - Mintlify 设计系统 */
 :root {
-  --color-brand: #18E299;
-  --color-brand-light: #d4fae8;
-  --color-brand-deep: #0fa76e;
-  --color-near-black: #0d0d0d;
-  --color-white: #ffffff;
-  --color-gray-700: #333333;
-  --color-gray-500: #666666;
-  --color-gray-400: #888888;
-  --color-gray-200: #e5e5e5;
-  --color-gray-100: #f5f5f5;
-  --color-error: #d45656;
-  --color-warn: #c37d0d;
-  --border-subtle: rgba(0,0,0,0.05);
-  --border-medium: rgba(0,0,0,0.08);
-  --shadow-card: rgba(0,0,0,0.03) 0px 2px 4px;
-  --shadow-button: rgba(0,0,0,0.06) 0px 1px 2px;
-  --transition-speed: 0.2s;
+  --color-brand: #43e77e;
+  --color-brand-light: rgba(67, 231, 126, 0.16);
+  --color-brand-deep: #94ffbb;
+  --color-near-black: #edf8f0;
+  --color-white: #111914;
+  --color-gray-700: #d4e1d8;
+  --color-gray-500: #9aada1;
+  --color-gray-400: #7f9488;
+  --color-gray-200: rgba(235, 255, 242, 0.18);
+  --color-gray-100: rgba(255, 255, 255, 0.08);
+  --color-error: #ff7b83;
+  --color-warn: #f0c36a;
+  --color-info: #88c7ff;
+  --border-subtle: rgba(235, 255, 242, 0.12);
+  --border-medium: rgba(235, 255, 242, 0.2);
+  --shadow-card: 0 22px 55px rgba(0, 0, 0, 0.28);
+  --shadow-button: 0 8px 20px rgba(0, 0, 0, 0.24);
+  --transition-speed: 0.25s;
 }
 
 /* 基础样式重置 */
@@ -32,7 +31,9 @@ body {
   padding: 0;
   font-family: 'Inter', 'Inter Fallback', system-ui, -apple-system, sans-serif;
   color: var(--color-gray-700);
-  background: var(--color-white);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(48, 184, 91, 0.16), transparent 38rem),
+    #070a09;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -100,16 +101,16 @@ select:focus {
 
 /* 卡片样式 - Mintlify 风格 */
 .card-mint {
-  background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.05);
-  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(28, 42, 34, 0.88), rgba(11, 16, 13, 0.92));
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
   padding: 24px;
-  box-shadow: rgba(0,0,0,0.03) 0px 2px 4px;
+  box-shadow: var(--shadow-card);
   transition: border-color var(--transition-speed) ease;
 }
 
 .card-mint:hover {
-  border-color: rgba(0,0,0,0.08);
+  border-color: rgba(148, 255, 187, 0.3);
 }
 
 /* 卡片阴影效果 */
@@ -258,13 +259,13 @@ select:focus {
 
 /* Mintlify 风格：大气渐变 Hero 背景 */
 .hero-gradient {
-  background: linear-gradient(180deg, #d4fae8 0%, rgba(24,226,153,0.08) 40%, #ffffff 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(67, 231, 126, 0.16), transparent 45%), #070a09;
 }
 
 /* Mintlify 风格：品牌绿色徽章 */
 .badge-brand {
-  background: #d4fae8;
-  color: #0fa76e;
+  background: rgba(67, 231, 126, 0.16);
+  color: #94ffbb;
   border-radius: 9999px;
   padding: 4px 12px;
   font-size: 13px;
@@ -275,14 +276,14 @@ select:focus {
 
 /* Mintlify 风格：主要按钮（药丸形深色） */
 .btn-primary {
-  background: #0d0d0d;
-  color: #ffffff;
+  background: var(--color-brand);
+  color: #06130a;
   padding: 8px 24px;
   border-radius: 9999px;
   font-size: 15px;
   font-weight: 500;
   border: none;
-  box-shadow: rgba(0,0,0,0.06) 0px 1px 2px;
+  box-shadow: 0 10px 25px rgba(67, 231, 126, 0.2);
   transition: opacity 0.2s ease;
 }
 
@@ -292,13 +293,13 @@ select:focus {
 
 /* Mintlify 风格：次要按钮（药丸形白色描边） */
 .btn-secondary {
-  background: #ffffff;
-  color: #0d0d0d;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-near-black);
   padding: 4.5px 12px;
   border-radius: 9999px;
   font-size: 15px;
   font-weight: 500;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--border-medium);
   transition: opacity 0.2s ease;
 }
 
@@ -308,8 +309,8 @@ select:focus {
 
 /* Mintlify 风格：品牌强调按钮 */
 .btn-brand {
-  background: #18E299;
-  color: #0d0d0d;
+  background: var(--color-brand);
+  color: #06130a;
   padding: 8px 24px;
   border-radius: 9999px;
   font-size: 15px;
@@ -324,16 +325,16 @@ select:focus {
 
 /* Quill 编辑器样式覆盖 */
 .ql-toolbar.ql-snow {
-  border: 1px solid rgba(0,0,0,0.08) !important;
+  border: 1px solid var(--border-medium) !important;
   border-radius: 16px 16px 0 0 !important;
-  background: #fafafa;
+  background: rgba(255,255,255,.06);
 }
 
 .ql-container.ql-snow {
-  border: 1px solid rgba(0,0,0,0.08) !important;
+  border: 1px solid var(--border-medium) !important;
   border-top: none !important;
   border-radius: 0 0 16px 16px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: inherit !important;
   font-size: 16px !important;
 }
 
@@ -343,6 +344,39 @@ select:focus {
 }
 
 .ql-editor.ql-blank::before {
-  color: #888888 !important;
+  color: #7f9488 !important;
   font-style: normal !important;
+}
+
+/* Shared dark-glass compatibility for the existing page markup. */
+main { color: var(--color-gray-700); }
+input, textarea, select {
+  color: var(--color-near-black);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-medium) !important;
+}
+input::placeholder, textarea::placeholder { color: var(--color-gray-400); }
+option { color: #eaf7ee; background: #121c16; }
+.bg-white { background-color: rgba(18, 28, 22, 0.88) !important; }
+.bg-gray-50, .bg-gray-100 { background-color: rgba(255,255,255,.06) !important; }
+.bg-brand-light { background-color: rgba(67, 231, 126, .16) !important; }
+.bg-blue-50 { background-color: rgba(136, 199, 255, .12) !important; }
+.text-near-black, .text-gray-700 { color: var(--color-near-black) !important; }
+.text-gray-500, .text-gray-400 { color: var(--color-gray-500) !important; }
+.text-brand, .text-brand-deep { color: var(--color-brand) !important; }
+.text-info-blue { color: var(--color-info) !important; }
+.border-\[rgba\(0\,0\,0\,0\.05\)\], .border-\[rgba\(0\,0\,0\,0\.08\)\] { border-color: var(--border-subtle) !important; }
+.shadow-card { box-shadow: var(--shadow-card) !important; }
+.shadow-button { box-shadow: var(--shadow-button) !important; }
+.text-error-red { color: var(--color-error) !important; }
+.bg-red-50 { background: rgba(255, 123, 131, .1) !important; }
+.bg-red-100 { background: rgba(255, 123, 131, .18) !important; }
+.modal-backdrop { background: rgba(0, 0, 0, .68) !important; }
+.ql-toolbar .ql-stroke { stroke: #b9ccc0 !important; }
+.ql-toolbar .ql-fill { fill: #b9ccc0 !important; }
+.ql-toolbar .ql-picker { color: #b9ccc0 !important; }
+.ql-container.ql-snow { background: rgba(255,255,255,.035); color: var(--color-near-black); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }

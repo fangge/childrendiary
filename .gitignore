@@ -38,3 +38,7 @@ Thumbs.db
 .pnpm-store/
 node_modules
 .hy-code
+
+# Local design prototypes
+.superpowers/
+docs
