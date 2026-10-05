@@ -161,7 +161,7 @@ const DiaryDeck = ({
           effect="coverflow"
           coverflowEffect={{
             rotate: 64,
-            stretch: 20,
+            stretch: 30,
             depth: 155,
             modifier: 1,
             scale: 0.88,
